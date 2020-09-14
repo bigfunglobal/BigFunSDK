@@ -23,5 +23,5 @@ interface IFBLoginListener {
      * @param jsonObject
      */
     @Keep
-    fun onComplete(jsonObject: JSONObject?, token: String?)
+    fun onComplete(jsonObject: JSONObject?)
 }

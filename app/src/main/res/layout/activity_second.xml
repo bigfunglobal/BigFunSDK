@@ -4,6 +4,20 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
+    <EditText
+        android:id="@+id/et_phone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入手机号"
+        android:maxLength="12"
+        android:text="917406202796" />
+
+    <EditText
+        android:id="@+id/et_code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="请输入验证码" />
+
     <Button
         android:id="@+id/btn_order"
         android:layout_width="match_parent"
@@ -20,13 +34,13 @@
         android:id="@+id/btn_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="login" />
+        android:text="游客登录" />
 
     <Button
-        android:id="@+id/btn_aaid"
+        android:id="@+id/btn_phone_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="aaid" />
+        android:text="手机号登录" />
 
     <Button
         android:id="@+id/btn_channel_config"

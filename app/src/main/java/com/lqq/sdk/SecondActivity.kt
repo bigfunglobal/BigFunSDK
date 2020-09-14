@@ -27,7 +27,6 @@ class SecondActivity : AppCompatActivity() {
 
         btn_order.setOnClickListener {
             BigFunSdk.instance.rechargeOrder(
-//                10RUPEE
                 mapOf(
                     "outUserId" to "0",
                     "outOrderNo" to "774",
@@ -69,11 +68,27 @@ class SecondActivity : AppCompatActivity() {
                 })
         }
 
-        btn_aaid.setOnClickListener {
-            //            thread {
-//                val id = AdvertisingIdClient.getAdvertisingIdInfo(applicationContext).id
-//                Log.d(TAG, "onCreate: $id")
-//            }
+        btn_phone_login.setOnClickListener {
+            BigFunSdk.instance.phoneLogin(mutableMapOf(
+                "mobile" to et_phone.text.toString(),
+                "code" to et_code.text.toString()
+            ),
+                object : ResponseListener {
+                    override fun onFail(msg: String) {
+                        Log.d(TAG, "onFail: $msg")
+                        runOnUiThread {
+                            tv.text = "登录失败--$msg"
+                        }
+                    }
+
+                    override fun onSuccess() {
+                        Log.d(TAG, "onSuccess: ")
+                        runOnUiThread {
+                            tv.text = "登录成功"
+                        }
+                    }
+
+                })
         }
 
         btn_channel_config.setOnClickListener {

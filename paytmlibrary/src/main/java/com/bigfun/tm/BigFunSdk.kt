@@ -59,13 +59,13 @@ class BigFunSdk private constructor() {
                 throw IllegalArgumentException("$PAY_TAG 缺少参数")
             }
             if (params["loginType"] == 2) {
-                if (!params.containsKey("mobile") || !params.containsKey("gameUserId") || !params.containsKey(
-                        "smsCode"
-                    )
+                if (!params.containsKey("mobile") || !params.containsKey(
+                        "code"
+                    ) || params["code"] == null
                 ) {
                     throw IllegalArgumentException("$PAY_TAG 缺少参数")
                 }
-                if (params["smsCode"] != HttpUtils.instance.smsCode) {
+                if (params["code"].toString() != HttpUtils.instance.smsCode || mPhone != params["mobile"]) {
                     listener.onFail("请输入正确的验证码")
                     return@thread
                 }
@@ -123,6 +123,7 @@ class BigFunSdk private constructor() {
             val sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase()
             map["sign"] = sign
             HttpUtils.instance.login(LOGIN, map, listener)
+            Log.d("TAG", "login: $map")
         }
     }
 
@@ -135,8 +136,8 @@ class BigFunSdk private constructor() {
         if (!params.containsKey("mobile")) {
             throw IllegalArgumentException("$PAY_TAG 缺少参数")
         }
-        val phone = params["mobile"].toString()
-        if (phone.length != 12 && phone.length != 10) {
+        mPhone = params["mobile"].toString()
+        if (mPhone.length != 12 && mPhone.length != 10) {
             Toast.makeText(
                 mContext!!,
                 "Please fill in the correct phone number",
@@ -144,17 +145,16 @@ class BigFunSdk private constructor() {
             ).show()
             return
         }
-        mPhone = if (phone.startsWith("91")) {
-            phone
+        val phone = if (mPhone.startsWith("91")) {
+            mPhone
         } else {
-            "91$phone"
+            "91$mPhone"
         }
-        Log.d("TAG", "sendSms: $mPhone")
         val map = mutableMapOf<String, Any>()
         treeMap.clear()
         sb.clear()
         treeMap.apply {
-            put("mobile", mPhone)
+            put("mobile", phone)
             put("channelCode", mChannel)
         }
         for ((key, value) in treeMap) {
@@ -244,7 +244,7 @@ class BigFunSdk private constructor() {
      */
     fun phoneLogin(params: Map<String, Any>, listener: ResponseListener) {
         val map = mutableMapOf<String, Any>()
-        map["loginType"] = 1
+        map["loginType"] = 2
         map.putAll(params)
         login(map, listener)
     }
@@ -264,7 +264,7 @@ class BigFunSdk private constructor() {
     @Keep
     fun getPayResult(requestCode: Int, data: Intent?): Boolean {
         if (requestCode == 100 && data != null) {
-            return data.getStringExtra("nativeSdkForMerchantMessage").isNotEmpty()
+            return data.getStringExtra("nativeSdkForMerchantMessage").isEmpty()
         }
         return false
     }

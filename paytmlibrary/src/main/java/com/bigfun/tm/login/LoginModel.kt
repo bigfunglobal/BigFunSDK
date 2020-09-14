@@ -55,8 +55,8 @@ internal class LoginModel(private val activity: Activity) {
     private fun getFacebookInfo(accessToken: AccessToken, listener: IFBLoginListener) {
         val request = GraphRequest.newMeRequest(accessToken) { `object`, _ ->
             if (`object` != null) {
-                listener.onComplete(`object`, accessToken.token)
-                login(`object`, accessToken.token)
+                listener.onComplete(`object`)
+                login(`object`)
             } else {
                 listener.onError(FacebookException("login fail"))
             }
@@ -73,7 +73,7 @@ internal class LoginModel(private val activity: Activity) {
     /**
      *
      */
-    private fun login(jsonObject: JSONObject, token: String) {
+    private fun login(jsonObject: JSONObject) {
         val map = mutableMapOf<String, Any>()
         map["loginType"] = 3
         jsonObject.apply {

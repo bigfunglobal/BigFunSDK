@@ -1,6 +1,7 @@
 package com.bigfun.tm
 
 import android.app.Activity
+import android.util.Log
 import com.google.gson.Gson
 import com.bigfun.tm.encrypt.EncryptUtil
 import com.bigfun.tm.model.LoginBean
