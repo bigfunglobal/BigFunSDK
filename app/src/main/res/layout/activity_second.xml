@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/btn_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="充值下单" />
+
+    <Button
+        android:id="@+id/btn_builder"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Builder模式" />
+
+    <Button
+        android:id="@+id/btn_login"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="login" />
+
+    <Button
+        android:id="@+id/btn_aaid"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="aaid" />
+
+    <Button
+        android:id="@+id/btn_channel_config"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取渠道配置" />
+
+    <Button
+        android:id="@+id/btn_send_sms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="发送短信" />
+
+    <Button
+        android:id="@+id/btn_with_order"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="提现下单" />
+
+    <TextView
+        android:id="@+id/tv"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+</LinearLayout>
