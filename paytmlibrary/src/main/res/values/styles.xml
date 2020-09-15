@@ -1,5 +1,5 @@
 <resources>
     <style name="BaseAppTheme" parent="Theme.AppCompat.Light.NoActionBar">
-        <item name="colorPrimaryDark">#2196F3</item>
+        <item name="colorPrimaryDark">#4FABF4</item>
     </style>
 </resources>

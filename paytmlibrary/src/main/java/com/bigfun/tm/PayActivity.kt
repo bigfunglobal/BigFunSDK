@@ -24,7 +24,7 @@ class PayActivity : AppCompatActivity() {
             .ready()
             .go(url)
 
-        tool_bar.setNavigationOnClickListener {
+        iv_back.setOnClickListener {
             finish()
         }
     }
