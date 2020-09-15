@@ -33,6 +33,7 @@ class BigFunSdk private constructor() {
         }
 
         @Keep
+        @JvmStatic
         fun init(
             context: Context,
             channel: String,

@@ -17,6 +17,7 @@ class LoginSdk private constructor(private val activity: Activity) {
         @Volatile
         private var instance: LoginSdk? = null
 
+        @JvmStatic
         fun getInstance(activity: Activity): LoginSdk {
             val i = instance
             if (i != null) {
