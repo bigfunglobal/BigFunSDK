@@ -2,10 +2,10 @@ package com.bigfun.tm.login
 
 import android.app.Activity
 import android.os.Bundle
+import com.bigfun.tm.BigFunSDK
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
-import com.bigfun.tm.BigFunSdk
 import com.bigfun.tm.ResponseListener
 import org.json.JSONObject
 import java.util.ArrayList
@@ -84,7 +84,7 @@ internal class LoginModel(private val activity: Activity) {
                 map["headImg"] = optString("url")
             }
         }
-        BigFunSdk.instance.login(map, object : ResponseListener {
+        BigFunSDK.getInstance().login(map, object : ResponseListener {
             override fun onFail(msg: String) {
 
             }

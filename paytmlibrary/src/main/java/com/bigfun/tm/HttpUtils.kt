@@ -1,7 +1,6 @@
 package com.bigfun.tm
 
 import android.app.Activity
-import android.util.Log
 import com.google.gson.Gson
 import com.bigfun.tm.encrypt.EncryptUtil
 import com.bigfun.tm.model.LoginBean
@@ -17,7 +16,7 @@ internal class HttpUtils private constructor() {
     private val mediaType = MediaType.get("application/json; charset=utf-8")
     var smsCode = ""
     private val token by lazy {
-        SPUtils.instance.get(BigFunSdk.mContext!!, "accessToken", "") as String
+        SPUtils.instance.get(BigFunSDK.mContext, "accessToken", "") as String
     }
 
     companion object {
@@ -110,7 +109,7 @@ internal class HttpUtils private constructor() {
     /**
      * 登录
      */
-    internal fun login(
+    fun login(
         url: String,
         params: Map<String, Any>,
         listener: ResponseListener
@@ -122,7 +121,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSdk.mContext!!, KEY_TOKEN, "") as String
+                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -140,7 +139,7 @@ internal class HttpUtils private constructor() {
                                     gson.fromJson(response.body()!!.string(), LoginBean::class.java)
                                 if (loginBean.code.toInt() == 0) {
                                     SPUtils.instance.put(
-                                        BigFunSdk.mContext!!,
+                                        BigFunSDK.mContext,
                                         KEY_TOKEN,
                                         loginBean.data.accessToken
                                     )
@@ -168,7 +167,7 @@ internal class HttpUtils private constructor() {
     /**
      * 发送验证码
      */
-    internal fun sendSms(
+    fun sendSms(
         url: String,
         params: Map<String, Any>,
         listener: ResponseListener
@@ -180,7 +179,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSdk.mContext!!, KEY_TOKEN, "") as String
+                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -281,7 +280,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSdk.mContext!!, KEY_TOKEN, "") as String
+                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -347,7 +346,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSdk.mContext!!, KEY_TOKEN, "") as String
+                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()

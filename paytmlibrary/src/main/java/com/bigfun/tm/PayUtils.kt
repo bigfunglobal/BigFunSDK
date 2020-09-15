@@ -44,8 +44,8 @@ class PayUtils private constructor() {
             }
         } else {
             if (email != null && phone != null && email.isNotEmpty() && phone.isNotEmpty()) {
-                SPUtils.instance.put(BigFunSdk.mContext!!, KEY_EMAIL, email)
-                SPUtils.instance.put(BigFunSdk.mContext!!, KEY_PHONE, phone)
+                SPUtils.instance.put(BigFunSDK.mContext, KEY_EMAIL, email)
+                SPUtils.instance.put(BigFunSDK.mContext, KEY_PHONE, phone)
                 activity.runOnUiThread {
                     val intent = Intent(activity, PayActivity::class.java)
                     var url = bean.jumpUrl.replace("email=null", "email=$email")
@@ -54,8 +54,10 @@ class PayUtils private constructor() {
                     activity.startActivity(intent)
                 }
             } else {
-                val saveEmail = SPUtils.instance.get(BigFunSdk.mContext!!, KEY_EMAIL, "") as String
-                val savePhone = SPUtils.instance.get(BigFunSdk.mContext!!, KEY_PHONE, "") as String
+                val saveEmail =
+                    SPUtils.instance.get(BigFunSDK.mContext, KEY_EMAIL, "") as String
+                val savePhone =
+                    SPUtils.instance.get(BigFunSDK.mContext, KEY_PHONE, "") as String
                 if (saveEmail.isNotEmpty() && savePhone.isNotEmpty()) {
                     activity.runOnUiThread {
                         val intent = Intent(activity, PayActivity::class.java)
@@ -69,8 +71,8 @@ class PayUtils private constructor() {
                         val dialog = CustomDialog(activity)
                         dialog.setOnClickListener(object : CustomDialog.IOnClickListener {
                             override fun ok(email: String, phone: String) {
-                                SPUtils.instance.put(BigFunSdk.mContext!!, KEY_EMAIL, email)
-                                SPUtils.instance.put(BigFunSdk.mContext!!, KEY_PHONE, phone)
+                                SPUtils.instance.put(BigFunSDK.mContext, KEY_EMAIL, email)
+                                SPUtils.instance.put(BigFunSDK.mContext, KEY_PHONE, phone)
                                 val intent = Intent(activity, PayActivity::class.java)
                                 var url = bean.jumpUrl.replace("email=null", "email=$email")
                                 url = url.replace("mobile=null", "mobile=$phone")

@@ -4,8 +4,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.CustomDialog
-import com.bigfun.tm.BigFunSdk
 import com.bigfun.tm.ResponseListener
 import com.bigfun.tm.login.Callback
 import kotlinx.android.synthetic.main.activity_second.*
@@ -19,14 +19,14 @@ class SecondActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
-        BigFunSdk.init(
+        BigFunSDK.init(
             applicationContext,
             "test_fb",
             "EUXLRCIKPVWBYEJW"
         )
 
         btn_order.setOnClickListener {
-            BigFunSdk.instance.rechargeOrder(
+            BigFunSDK.getInstance().rechargeOrder(
                 mapOf(
                     "outUserId" to "0",
                     "outOrderNo" to "774",
@@ -50,7 +50,7 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_login.setOnClickListener {
-            BigFunSdk.instance.guestLogin(
+            BigFunSDK.getInstance().guestLogin(
                 object : ResponseListener {
                     override fun onFail(msg: String) {
                         Log.d(TAG, "onFail: $msg")
@@ -69,9 +69,9 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_phone_login.setOnClickListener {
-            BigFunSdk.instance.phoneLogin(mutableMapOf(
-                "mobile" to et_phone.text.toString(),
-                "code" to et_code.text.toString()
+            BigFunSDK.getInstance().phoneLogin(mutableMapOf(
+                "mobile" to et_phone.text as Any,
+                "code" to et_code.text
             ),
                 object : ResponseListener {
                     override fun onFail(msg: String) {
@@ -92,7 +92,7 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_channel_config.setOnClickListener {
-            BigFunSdk.instance.getChannelConfig(
+            BigFunSDK.getInstance().getChannelConfig(
                 object : Callback<String> {
                     override fun onResult(result: String) {
                         Log.d(TAG, "onResult: $result")
@@ -105,8 +105,8 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_send_sms.setOnClickListener {
-            BigFunSdk.instance.sendSms(mutableMapOf(
-                "mobile" to "917406202796"
+            BigFunSDK.getInstance().sendSms(mutableMapOf(
+                "mobile" to "917406202796" as Any
             ), object : ResponseListener {
                 override fun onFail(msg: String) {
                     Log.d(
