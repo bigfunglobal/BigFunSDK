@@ -69,9 +69,9 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_phone_login.setOnClickListener {
-            BigFunSDK.getInstance().phoneLogin(mutableMapOf(
-                "mobile" to et_phone.text as Any,
-                "code" to et_code.text
+            BigFunSDK.getInstance().phoneLogin(mutableMapOf<String, Any>(
+                "mobile" to et_phone.text.toString(),
+                "code" to et_code.text.toString()
             ),
                 object : ResponseListener {
                     override fun onFail(msg: String) {

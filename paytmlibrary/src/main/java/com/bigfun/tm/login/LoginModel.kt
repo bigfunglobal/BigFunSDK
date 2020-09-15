@@ -3,10 +3,10 @@ package com.bigfun.tm.login
 import android.app.Activity
 import android.os.Bundle
 import com.bigfun.tm.BigFunSDK
+import com.bigfun.tm.ResponseListener
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
-import com.bigfun.tm.ResponseListener
 import org.json.JSONObject
 import java.util.ArrayList
 
