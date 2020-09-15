@@ -54,28 +54,16 @@ public class BigFunSDK {
      * 登录
      *
      * @param params
-     * @param listener
+     * @param callback
      */
     @Keep
-    public void login(Map<String, Object> params, ResponseListener listener) {
+    public <T> void login(Map<String, Object> params, Callback<T> callback) {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 check();
                 if (!params.containsKey("loginType")) {
                     throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
-                }
-                if (params.get("loginType").equals("2")) {
-                    if (!params.containsKey("mobile") || !params.containsKey(
-                            "code"
-                    ) || params.get("code") == null
-                    ) {
-                        throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
-                    }
-                    if (!params.get("code").toString().equals(HttpUtils.getInstance().getSmsCode()) || !mPhone.equals(params.get("mobile"))) {
-                        listener.onFail("请输入正确的验证码");
-                        return;
-                    }
                 }
                 Map<String, Object> map = new HashMap<>(params);
                 map.put("deviceType", "Android");
@@ -128,7 +116,7 @@ public class BigFunSDK {
                 sb.append("key=").append(mKey);
                 String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
                 map.put("sign", sign);
-                HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, listener);
+                HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, callback);
             }
         }).start();
     }
@@ -137,20 +125,30 @@ public class BigFunSDK {
      * 游客登录
      */
     @Keep
-    public void guestLogin(ResponseListener listener) {
+    public <T> void guestLogin(Callback<T> callback) {
         Map<String, Object> map = new HashMap<>();
         map.put("loginType", 1);
-        login(map, listener);
+        login(map, callback);
     }
 
     /**
      * 手机号登录
      */
     @Keep
-    public void phoneLogin(Map<String, Object> params, ResponseListener listener) {
+    public <T> void phoneLogin(Map<String, Object> params, Callback<T> callback) {
+        if (!params.containsKey("mobile") || !params.containsKey(
+                "code"
+        ) || params.get("code") == null
+        ) {
+            throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
+        }
+        if (!params.get("code").toString().equals(HttpUtils.getInstance().getSmsCode()) || !mPhone.equals(params.get("mobile"))) {
+            callback.onFail("请输入正确的验证码");
+            return;
+        }
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 2);
-        login(map, listener);
+        login(map, callback);
     }
 
     /**
@@ -250,6 +248,24 @@ public class BigFunSDK {
         HttpUtils.getInstance().getChannelConfig(NetConstantKt.GET_CHANNEL_CONFIG, map, callback);
     }
 
+    /**
+     * token登录
+     *
+     * @param token
+     */
+    @Keep
+    public <T> void loginByToken(String token, Callback<T> callback) {
+        String saveToken = (String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_TOKEN, "");
+        if (token.equals(saveToken)) {
+            String phone = (String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_LOGIN_PHONE, "");
+            Map<String, Object> map = new HashMap<>();
+            map.put("mobile", phone);
+            map.put("loginType", 2);
+            login(map, callback);
+        } else {
+            callback.onFail("token不存在");
+        }
+    }
 
     /**
      * 检查是否初始化

@@ -7,6 +7,7 @@ private const val FILE_NAME = "share_data_sp"
 class SPUtils {
 
     companion object {
+        @JvmStatic
         val instance: SPUtils by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) {
             SPUtils()
         }

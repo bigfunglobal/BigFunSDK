@@ -109,10 +109,10 @@ internal class HttpUtils private constructor() {
     /**
      * 登录
      */
-    fun login(
+    fun <T> login(
         url: String,
         params: Map<String, Any>,
-        listener: ResponseListener
+        callback: com.bigfun.tm.login.Callback<T>
     ) {
         if (url.isEmpty()) throw IllegalArgumentException("url.length() == 0")
         if (params.isEmpty()) throw IllegalArgumentException("params.size == 0")
@@ -127,7 +127,7 @@ internal class HttpUtils private constructor() {
             .build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                listener.onFail("${e.message}")
+                callback.onFail("${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -138,23 +138,33 @@ internal class HttpUtils private constructor() {
                                 val loginBean =
                                     gson.fromJson(response.body()!!.string(), LoginBean::class.java)
                                 if (loginBean.code.toInt() == 0) {
+                                    val loginType = params["loginType"] as Int
+                                    if (loginType == 2) {
+                                        params["mobile"]?.apply {
+                                            SPUtils.instance.put(
+                                                BigFunSDK.mContext,
+                                                KEY_LOGIN_PHONE,
+                                                this
+                                            )
+                                        }
+                                    }
                                     SPUtils.instance.put(
                                         BigFunSDK.mContext,
                                         KEY_TOKEN,
                                         loginBean.data.accessToken
                                     )
-                                    listener.onSuccess()
+                                    callback.onResult(loginBean.data.accessToken as T)
                                 } else {
-                                    listener.onFail(loginBean.msg)
+                                    callback.onFail(loginBean.msg)
                                 }
                             } else {
-                                listener.onFail(response.message())
+                                callback.onFail(response.message())
                             }
                         } else {
-                            listener.onFail(response.message())
+                            callback.onFail(response.message())
                         }
                     } else {
-                        listener.onFail("${response.code()}--${response.message()}")
+                        callback.onFail("${response.code()}--${response.message()}")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
