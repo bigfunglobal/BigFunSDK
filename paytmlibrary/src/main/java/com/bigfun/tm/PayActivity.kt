@@ -23,6 +23,10 @@ class PayActivity : AppCompatActivity() {
             .createAgentWeb()
             .ready()
             .go(url)
+
+        tool_bar.setNavigationOnClickListener {
+            finish()
+        }
     }
 
     override fun onResume() {
@@ -43,7 +47,7 @@ class PayActivity : AppCompatActivity() {
     override fun onKeyDown(keyCode: Int, event: KeyEvent?): Boolean {
         mAgentWeb?.apply {
             if (handleKeyEvent(keyCode, event)) {
-                return true;
+                return true
             }
         }
         return super.onKeyDown(keyCode, event)
