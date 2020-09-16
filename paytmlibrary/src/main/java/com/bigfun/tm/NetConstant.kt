@@ -2,9 +2,6 @@ package com.bigfun.tm
 
 const val BASE_URL = "https://bigfun.xiaoxiangwan.com/api/"
 
-//const val BASE_URL = "http://192.168.188.248:8463/api/"
-//const val BASE_URL = "http://192.168.188.93:8463/api/"
-
 /**
  * 登录
  */

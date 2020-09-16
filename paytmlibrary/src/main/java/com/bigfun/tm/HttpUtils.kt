@@ -14,7 +14,6 @@ import java.util.concurrent.TimeUnit
 internal class HttpUtils private constructor() {
 
     private val mediaType = MediaType.get("application/json; charset=utf-8")
-    var smsCode = ""
     private val token by lazy {
         SPUtils.instance.get(BigFunSDK.mContext, "accessToken", "") as String
     }
@@ -209,7 +208,6 @@ internal class HttpUtils private constructor() {
                                         SendSmsBean::class.java
                                     )
                                 if (bean.code.toInt() == 0) {
-                                    smsCode = bean.data
                                     listener.onSuccess()
                                 } else {
                                     listener.onFail(bean.msg)

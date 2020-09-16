@@ -133,15 +133,9 @@ public class BigFunSDK {
      */
     @Keep
     public void phoneLogin(Map<String, Object> params, ResponseListener listener) {
-        if (!params.containsKey("mobile") || !params.containsKey(
-                "code"
-        ) || params.get("code") == null
+        if (!params.containsKey("mobile")
         ) {
             throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
-        }
-        if (!params.get("code").toString().equals(HttpUtils.getInstance().getSmsCode()) || !mPhone.equals(params.get("mobile"))) {
-            listener.onFail("请输入正确的验证码");
-            return;
         }
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 2);
@@ -152,7 +146,7 @@ public class BigFunSDK {
      * 发送短信
      */
     @Keep
-    public void sendSms(Map<String, Object> params, ResponseListener listener) {
+    private void sendSms(Map<String, Object> params, ResponseListener listener) {
         check();
         if (!params.containsKey("mobile")) {
             throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
@@ -324,6 +318,19 @@ public class BigFunSDK {
                 }
             });
         }).start();
+    }
+
+    /**
+     * google登录
+     *
+     * @param params
+     * @param listener
+     */
+    @Keep
+    public void googleLogin(Map<String, Object> params, ResponseListener listener) {
+        Map<String, Object> map = new HashMap<>(params);
+        map.put("loginType", 4);
+        login(map, listener);
     }
 
     /**

@@ -2,7 +2,6 @@ package com.bigfun.tm.login
 
 import android.app.Activity
 import android.os.Bundle
-import android.util.Log
 import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.ResponseListener
 import com.facebook.*
@@ -87,11 +86,9 @@ internal class LoginModel(private val activity: Activity) {
         }
         BigFunSDK.getInstance().login(map, object : ResponseListener {
             override fun onSuccess() {
-                Log.d("LoginModel", "onSuccess: ")
             }
 
             override fun onFail(msg: String?) {
-                Log.d("LoginModel", "onFail: $msg")
             }
         })
     }
