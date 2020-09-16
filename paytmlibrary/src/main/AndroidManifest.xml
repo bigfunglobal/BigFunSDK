@@ -9,6 +9,7 @@
     <application>
         <activity
             android:name="com.bigfun.tm.PayActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/BaseAppTheme" />
     </application>
 </manifest>
