@@ -14,6 +14,7 @@ import com.facebook.CallbackManager
 import com.facebook.FacebookException
 import kotlinx.android.synthetic.main.activity_second.*
 import org.json.JSONObject
+import java.util.HashMap
 
 
 private const val TAG = "SecondActivity"
@@ -72,14 +73,14 @@ class SecondActivity : AppCompatActivity() {
         btn_phone_login.setOnClickListener {
             BigFunSDK.getInstance().phoneLogin(mutableMapOf<String, Any>(
                 "mobile" to et_phone.text.toString(),
-                "code" to et_code.text.toString()
             ),
                 object : ResponseListener {
                     override fun onSuccess() {
-
+                        Log.d(TAG, "onSuccess: ")
                     }
 
                     override fun onFail(msg: String?) {
+                        Log.d(TAG, "onFail: $msg")
                     }
                 })
         }
@@ -98,23 +99,20 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_send_sms.setOnClickListener {
-            BigFunSDK.getInstance().sendSms(mutableMapOf(
-                "mobile" to "917406202796" as Any
-            ), object : ResponseListener {
-                override fun onFail(msg: String) {
-                    Log.d(
-                        TAG,
-                        "onFail: $msg"
-                    )
-                    runOnUiThread {
-                        tv.text = "获取验证码失败$msg"
-                    }
+            val map = mutableMapOf<String,Any>()
+            map.put("authCode","google用户信息对应的id")
+            map.put("email","邮箱")
+            map.put("sex","性别")
+            map.put("age","年龄")
+            map.put("nickName","昵称")
+            map.put("headImg","头像")
+            BigFunSDK.getInstance().googleLogin(map,object :ResponseListener{
+                override fun onSuccess() {
+
                 }
 
-                override fun onSuccess() {
-                    runOnUiThread {
-                        tv.text = "获取验证码成功"
-                    }
+                override fun onFail(msg: String?) {
+
                 }
             })
         }
