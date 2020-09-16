@@ -10,10 +10,11 @@ public class LoginSDK {
 
     private static LoginSDK instance;
     private Activity activity;
-    private LoginModel loginModel = new LoginModel(activity);
+    private LoginModel loginModel;
 
     private LoginSDK(Activity activity) {
         this.activity = activity;
+        loginModel = new LoginModel(activity);
     }
 
     @Keep
