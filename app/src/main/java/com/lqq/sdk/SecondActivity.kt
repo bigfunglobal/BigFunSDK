@@ -8,7 +8,12 @@ import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.CustomDialog
 import com.bigfun.tm.ResponseListener
 import com.bigfun.tm.login.Callback
+import com.bigfun.tm.login.IFBLoginListener
+import com.bigfun.tm.login.LoginSDK
+import com.facebook.CallbackManager
+import com.facebook.FacebookException
 import kotlinx.android.synthetic.main.activity_second.*
+import org.json.JSONObject
 
 
 private const val TAG = "SecondActivity"
@@ -16,6 +21,9 @@ const val TOKEN =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYXBpdXNlciIsImFjY291bnQiOiI0Mjc1MiIsImlzcyI6ImpveWNoZWFwIiwiYXVkIjoiMDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjYiLCJleHBpcmVkVGltZSI6MTYwMDk0NjQyMDgzMywiZXhwIjoxNjAwOTQ2NDIwLCJuYmYiOjE1OTkyMTg0MjB9.pGnxoGkghbZBhKxqx029ftIj9RyUehsmvonbm9W7RZ8"
 
 class SecondActivity : AppCompatActivity() {
+
+    private val callbackManager = CallbackManager.Factory.create()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
@@ -51,7 +59,7 @@ class SecondActivity : AppCompatActivity() {
 
         btn_login.setOnClickListener {
             BigFunSDK.getInstance().guestLogin(
-                object : ResponseListener{
+                object : ResponseListener {
                     override fun onSuccess() {
 
                     }
@@ -66,7 +74,7 @@ class SecondActivity : AppCompatActivity() {
                 "mobile" to et_phone.text.toString(),
                 "code" to et_code.text.toString()
             ),
-                object :ResponseListener{
+                object : ResponseListener {
                     override fun onSuccess() {
 
                     }
@@ -111,28 +119,25 @@ class SecondActivity : AppCompatActivity() {
             })
         }
 
-        btn_with_order.setOnClickListener {
-            //            PaytmSdk.instance.withdrawOrder(mutableMapOf(
-//                "outOrderNo" to "545634564564",
-//                "outUserId" to "0",
-//                "userId" to "444",
-//                "channelCode" to "test007",
-//                "payType" to 3,
-//                "payAccount" to 3,
-//                "payAmount" to 200
-//            ), object : ResponseListener {
-//                override fun onFail(e: Exception) {
-//                    Log.d(TAG, "onFail: ${e.message}")
-//                }
-//
-//                override fun onResult(response: Response) {
-//                    Log.d(TAG, "onResult: ${response.body?.string()}--${response.isSuccessful}")
-//                }
-//            })
+        btn_fb_login.setOnClickListener {
+            LoginSDK.getInstance(this).facebookLogin(callbackManager, object : IFBLoginListener {
+                override fun onCancel() {
+                    Log.d(TAG, "onCancel: ")
+                }
+
+                override fun onError(error: FacebookException?) {
+                    Log.d(TAG, "onError: ${error?.message}")
+                }
+
+                override fun onComplete(jsonObject: JSONObject?) {
+                    Log.d(TAG, "onComplete: ")
+                }
+            })
         }
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == 100 && data != null) {
             Log.d(
