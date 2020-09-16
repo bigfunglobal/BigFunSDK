@@ -36,6 +36,7 @@ public class BigFunSDK {
         mContext = context;
         mChannel = channel;
         mKey = key;
+        loginByToken();
     }
 
     @Keep
@@ -54,70 +55,66 @@ public class BigFunSDK {
      * 登录
      *
      * @param params
-     * @param callback
      */
     @Keep
-    public <T> void login(Map<String, Object> params, Callback<T> callback) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                check();
-                if (!params.containsKey("loginType")) {
-                    throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
-                }
-                Map<String, Object> map = new HashMap<>(params);
-                map.put("deviceType", "Android");
-                map.put("deviceModel", Build.MODEL);
-                map.put("deviceBrand", Build.BRAND);
-                try {
-                    map.put("aaid", AdvertisingIdClient.getAdId(mContext));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    map.put("aaid", "111111111111111111111111111");
-                }
-                map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
-                map.put("ip", UtilsKt.getIp(mContext));
-                map.put("channelCode", mChannel);
-                if (!map.containsKey("email")) {
-                    map.put("email", "");
-                }
-                if (!map.containsKey("sex")) {
-                    map.put("sex", 0);
-                }
-                if (!map.containsKey("age")) {
-                    map.put("age", 0);
-                }
-                if (!map.containsKey("nickName")) {
-                    map.put("nickName", "unknow");
-                }
-                if (!map.containsKey("headImg")) {
-                    map.put("headImg", "unknow");
-                }
-                if (!map.containsKey("mobile")) {
-                    map.put("mobile", "0");
-                }
-                if (!map.containsKey("gameUserId")) {
-                    map.put("gameUserId", 0);
-                }
-                if (!map.containsKey("authCode")) {
-                    map.put("authCode", "");
-                }
-                treeMap.clear();
-                sb.delete(0, sb.length());
-                treeMap.put("loginType", map.get("loginType"));
-                treeMap.put("channelCode", mChannel);
-                treeMap.put("gameUserId", map.get("gameUserId"));
-                treeMap.put("mobile", map.get("mobile"));
-                treeMap.put("androidId", map.get("androidId"));
-                treeMap.put("authCode", map.get("authCode"));
-                for (String key : treeMap.keySet()) {
-                    sb.append(key).append("=").append(treeMap.get(key)).append("&");
-                }
-                sb.append("key=").append(mKey);
-                String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
-                map.put("sign", sign);
-                HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, callback);
+    public void login(Map<String, Object> params, ResponseListener listener) {
+        new Thread(() -> {
+            check();
+            if (!params.containsKey("loginType")) {
+                throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
             }
+            Map<String, Object> map = new HashMap<>(params);
+            map.put("deviceType", "Android");
+            map.put("deviceModel", Build.MODEL);
+            map.put("deviceBrand", Build.BRAND);
+            try {
+                map.put("aaid", AdvertisingIdClient.getAdId(mContext));
+            } catch (Exception e) {
+                e.printStackTrace();
+                map.put("aaid", "111111111111111111111111111");
+            }
+            map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
+            map.put("ip", UtilsKt.getIp(mContext));
+            map.put("channelCode", mChannel);
+            if (!map.containsKey("email")) {
+                map.put("email", "");
+            }
+            if (!map.containsKey("sex")) {
+                map.put("sex", 0);
+            }
+            if (!map.containsKey("age")) {
+                map.put("age", 0);
+            }
+            if (!map.containsKey("nickName")) {
+                map.put("nickName", "unknow");
+            }
+            if (!map.containsKey("headImg")) {
+                map.put("headImg", "unknow");
+            }
+            if (!map.containsKey("mobile")) {
+                map.put("mobile", "0");
+            }
+            if (!map.containsKey("gameUserId")) {
+                map.put("gameUserId", 0);
+            }
+            if (!map.containsKey("authCode")) {
+                map.put("authCode", "");
+            }
+            treeMap.clear();
+            sb.delete(0, sb.length());
+            treeMap.put("loginType", map.get("loginType"));
+            treeMap.put("channelCode", mChannel);
+            treeMap.put("gameUserId", map.get("gameUserId"));
+            treeMap.put("mobile", map.get("mobile"));
+            treeMap.put("androidId", map.get("androidId"));
+            treeMap.put("authCode", map.get("authCode"));
+            for (String key : treeMap.keySet()) {
+                sb.append(key).append("=").append(treeMap.get(key)).append("&");
+            }
+            sb.append("key=").append(mKey);
+            String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
+            map.put("sign", sign);
+            HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, listener);
         }).start();
     }
 
@@ -125,17 +122,17 @@ public class BigFunSDK {
      * 游客登录
      */
     @Keep
-    public <T> void guestLogin(Callback<T> callback) {
+    public void guestLogin(ResponseListener listener) {
         Map<String, Object> map = new HashMap<>();
         map.put("loginType", 1);
-        login(map, callback);
+        login(map, listener);
     }
 
     /**
      * 手机号登录
      */
     @Keep
-    public <T> void phoneLogin(Map<String, Object> params, Callback<T> callback) {
+    public void phoneLogin(Map<String, Object> params, ResponseListener listener) {
         if (!params.containsKey("mobile") || !params.containsKey(
                 "code"
         ) || params.get("code") == null
@@ -143,12 +140,12 @@ public class BigFunSDK {
             throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
         }
         if (!params.get("code").toString().equals(HttpUtils.getInstance().getSmsCode()) || !mPhone.equals(params.get("mobile"))) {
-            callback.onFail("请输入正确的验证码");
+            listener.onFail("请输入正确的验证码");
             return;
         }
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 2);
-        login(map, callback);
+        login(map, listener);
     }
 
     /**
@@ -250,21 +247,83 @@ public class BigFunSDK {
 
     /**
      * token登录
-     *
-     * @param token
      */
     @Keep
-    public <T> void loginByToken(String token, Callback<T> callback) {
-        String saveToken = (String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_TOKEN, "");
-        if (token.equals(saveToken)) {
+    private static void loginByToken() {
+        new Thread(() -> {
+            if (TextUtils.isEmpty(mChannel) || mContext == null) {
+                throw new IllegalArgumentException(ConstantKt.PAY_TAG + "not init,please init sdk");
+            }
             String phone = (String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_LOGIN_PHONE, "");
-            Map<String, Object> map = new HashMap<>();
-            map.put("mobile", phone);
-            map.put("loginType", 2);
-            login(map, callback);
-        } else {
-            callback.onFail("token不存在");
-        }
+            if (TextUtils.isEmpty(phone)) {
+                return;
+            }
+            Map<String, Object> params = new HashMap<>();
+            params.put("mobile", phone);
+            params.put("loginType", 2);
+            Map<String, Object> map = new HashMap<>(params);
+            map.put("deviceType", "Android");
+            map.put("deviceModel", Build.MODEL);
+            map.put("deviceBrand", Build.BRAND);
+            try {
+                map.put("aaid", AdvertisingIdClient.getAdId(mContext));
+            } catch (Exception e) {
+                e.printStackTrace();
+                map.put("aaid", "111111111111111111111111111");
+            }
+            map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
+            map.put("ip", UtilsKt.getIp(mContext));
+            map.put("channelCode", mChannel);
+            if (!map.containsKey("email")) {
+                map.put("email", "");
+            }
+            if (!map.containsKey("sex")) {
+                map.put("sex", 0);
+            }
+            if (!map.containsKey("age")) {
+                map.put("age", 0);
+            }
+            if (!map.containsKey("nickName")) {
+                map.put("nickName", "unknow");
+            }
+            if (!map.containsKey("headImg")) {
+                map.put("headImg", "unknow");
+            }
+            if (!map.containsKey("mobile")) {
+                map.put("mobile", "0");
+            }
+            if (!map.containsKey("gameUserId")) {
+                map.put("gameUserId", 0);
+            }
+            if (!map.containsKey("authCode")) {
+                map.put("authCode", "");
+            }
+            TreeMap<String, Object> treeMap = new TreeMap<>(String::compareTo);
+            StringBuilder sb = new StringBuilder();
+            treeMap.put("loginType", map.get("loginType"));
+            treeMap.put("channelCode", mChannel);
+            treeMap.put("gameUserId", map.get("gameUserId"));
+            treeMap.put("mobile", map.get("mobile"));
+            treeMap.put("androidId", map.get("androidId"));
+            treeMap.put("authCode", map.get("authCode"));
+            for (String key : treeMap.keySet()) {
+                sb.append(key).append("=").append(treeMap.get(key)).append("&");
+            }
+            sb.append("key=").append(mKey);
+            String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
+            map.put("sign", sign);
+            HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, new ResponseListener() {
+                @Override
+                public void onSuccess() {
+
+                }
+
+                @Override
+                public void onFail(String msg) {
+
+                }
+            });
+        }).start();
     }
 
     /**

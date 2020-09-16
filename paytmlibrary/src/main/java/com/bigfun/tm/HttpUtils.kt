@@ -109,10 +109,10 @@ internal class HttpUtils private constructor() {
     /**
      * 登录
      */
-    fun <T> login(
+    fun login(
         url: String,
         params: Map<String, Any>,
-        callback: com.bigfun.tm.login.Callback<T>
+        listener: ResponseListener
     ) {
         if (url.isEmpty()) throw IllegalArgumentException("url.length() == 0")
         if (params.isEmpty()) throw IllegalArgumentException("params.size == 0")
@@ -127,7 +127,7 @@ internal class HttpUtils private constructor() {
             .build()
         okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
-                callback.onFail("${e.message}")
+                listener.onFail("${e.message}")
             }
 
             override fun onResponse(call: Call, response: Response) {
@@ -153,18 +153,18 @@ internal class HttpUtils private constructor() {
                                         KEY_TOKEN,
                                         loginBean.data.accessToken
                                     )
-                                    callback.onResult(loginBean.data.accessToken as T)
+                                    listener.onSuccess()
                                 } else {
-                                    callback.onFail(loginBean.msg)
+                                    listener.onFail(loginBean.msg)
                                 }
                             } else {
-                                callback.onFail(response.message())
+                                listener.onFail(response.message())
                             }
                         } else {
-                            callback.onFail(response.message())
+                            listener.onFail(response.message())
                         }
                     } else {
-                        callback.onFail("${response.code()}--${response.message()}")
+                        listener.onFail("${response.code()}--${response.message()}")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()

@@ -84,12 +84,12 @@ internal class LoginModel(private val activity: Activity) {
                 map["headImg"] = optString("url")
             }
         }
-        BigFunSDK.getInstance().login(map, object : Callback<String> {
-            override fun onFail(msg: String) {
+        BigFunSDK.getInstance().login(map, object : ResponseListener{
+            override fun onSuccess() {
 
             }
 
-            override fun onResult(result: String?) {
+            override fun onFail(msg: String?) {
             }
         })
     }

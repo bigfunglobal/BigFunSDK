@@ -51,19 +51,12 @@ class SecondActivity : AppCompatActivity() {
 
         btn_login.setOnClickListener {
             BigFunSDK.getInstance().guestLogin(
-                object : ResponseListener {
-                    override fun onFail(msg: String) {
-                        Log.d(TAG, "onFail: $msg")
-                        runOnUiThread {
-                            tv.text = "登录失败$msg"
-                        }
+                object : ResponseListener{
+                    override fun onSuccess() {
+
                     }
 
-                    override fun onSuccess() {
-                        Log.d(TAG, "onResult: ")
-                        runOnUiThread {
-                            tv.text = "登录成功"
-                        }
+                    override fun onFail(msg: String?) {
                     }
                 })
         }
@@ -73,21 +66,13 @@ class SecondActivity : AppCompatActivity() {
                 "mobile" to et_phone.text.toString(),
                 "code" to et_code.text.toString()
             ),
-                object : ResponseListener {
-                    override fun onFail(msg: String) {
-                        Log.d(TAG, "onFail: $msg")
-                        runOnUiThread {
-                            tv.text = "登录失败--$msg"
-                        }
-                    }
-
+                object :ResponseListener{
                     override fun onSuccess() {
-                        Log.d(TAG, "onSuccess: ")
-                        runOnUiThread {
-                            tv.text = "登录成功"
-                        }
+
                     }
 
+                    override fun onFail(msg: String?) {
+                    }
                 })
         }
 
