@@ -66,8 +66,9 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_phone_login.setOnClickListener {
-            BigFunSDK.getInstance().phoneLogin(mutableMapOf<String, Any>(
+            BigFunSDK.getInstance().loginWithCode(mutableMapOf<String, Any>(
                 "mobile" to et_phone.text.toString(),
+                "code" to et_code.text.toString()
             ),
                 object : ResponseListener {
                     override fun onSuccess() {
@@ -94,62 +95,22 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_send_sms.setOnClickListener {
-            val map = mutableMapOf<String, Any>()
-            map.put("authCode", "google用户信息对应的id")
-            map.put("email", "邮箱")
-            map.put("sex", "性别")
-            map.put("age", "年龄")
-            map.put("nickName", "昵称")
-            map.put("headImg", "头像")
-            BigFunSDK.getInstance().googleLogin(map, object : ResponseListener {
-                override fun onSuccess() {
+            BigFunSDK.getInstance().sendSms(mutableMapOf<String, Any>(
+                "mobile" to et_phone.text.toString(),
+            ),
+                object : ResponseListener {
+                    override fun onSuccess() {
+                        Log.d(TAG, "onSuccess: ")
+                    }
 
-                }
-
-                override fun onFail(msg: String?) {
-
-                }
-            })
+                    override fun onFail(msg: String?) {
+                        Log.d(TAG, "onFail: $msg")
+                    }
+                })
         }
 
-        btn_fb_login.setOnClickListener {
-            LoginSDK.getInstance(this).facebookLogin(callbackManager, object : IFBLoginListener {
-                override fun onCancel() {
-                    Log.d(TAG, "onCancel: ")
-                }
-
-                override fun onError(error: FacebookException?) {
-                    Log.d(TAG, "onError: ${error?.message}")
-                }
-
-                override fun onComplete(jsonObject: JSONObject?) {
-                    Log.d(TAG, "onComplete: ")
-                }
-            })
-        }
-
-        btn_get_recharge_channel.setOnClickListener {
-            BigFunSDK.getInstance().getRechargeChannel(object : Callback<String> {
-                override fun onResult(result: String?) {
-                    Log.d(TAG, "onResult: $result")
-                }
-
-                override fun onFail(msg: String?) {
-                    Log.d(TAG, "onFail: $msg")
-                }
-            })
-        }
-
-        btn_get_withdraw_channel.setOnClickListener {
-            BigFunSDK.getInstance().getWithdrawChannel(object : Callback<String> {
-                override fun onResult(result: String?) {
-                    Log.d(TAG, "onResult: $result")
-                }
-
-                override fun onFail(msg: String?) {
-                    Log.d(TAG, "onFail: $msg")
-                }
-            })
+        btn_is_login.setOnClickListener {
+            Log.d(TAG, "onCreate: ${BigFunSDK.getInstance().isLogin}")
         }
     }
 

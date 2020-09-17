@@ -165,7 +165,7 @@ public class BigFunSDK {
      * 发送短信
      */
     @Keep
-    private void sendSms(Map<String, Object> params, ResponseListener listener) {
+    public void sendSms(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -428,5 +428,48 @@ public class BigFunSDK {
         map.put("channelCode", mChannel);
         map.put("sign", sign);
         HttpUtils.getInstance().post(NetConstantKt.GET_WITHDRAW_CHANNEL, map, callback);
+    }
+
+    /**
+     * 手机号+验证码登录
+     *
+     * @param params
+     * @param listener
+     */
+    @Keep
+    public void loginWithCode(Map<String, Object> params, ResponseListener listener) {
+        if (checkSdkNotInit()) {
+            return;
+        }
+        if (!params.containsKey("mobile") || !params.containsKey("code") ||
+                TextUtils.isEmpty(params.get("mobile").toString()) ||
+                TextUtils.isEmpty(params.get("code").toString())) {
+            listener.onFail("缺少参数");
+            return;
+        }
+        if (TextUtils.isEmpty(HttpUtils.mCode)) {
+            listener.onFail("请先获取验证码");
+            return;
+        }
+        if (!HttpUtils.mCode.equals(params.get("code")) || !HttpUtils.mPhone.equals(params.get("mobile"))) {
+            listener.onFail("验证码错误或者验证码与上一次获取的手机号不一致");
+            return;
+        }
+        Map<String, Object> map = new HashMap<>(params);
+        map.put("loginType", 2);
+        login(map, listener);
+    }
+
+    /**
+     * 是否已登录
+     *
+     * @return
+     */
+    @Keep
+    public boolean isLogin() {
+        if (checkSdkNotInit()) {
+            return false;
+        }
+        return !TextUtils.isEmpty((String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_TOKEN, ""));
     }
 }

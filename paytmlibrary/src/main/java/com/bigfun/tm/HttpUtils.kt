@@ -21,6 +21,12 @@ internal class HttpUtils private constructor() {
     companion object {
         private const val TIME_OUT = 10L
 
+        @JvmField
+        var mCode: String = ""
+
+        @JvmField
+        var mPhone: String = ""
+
         @JvmStatic
         val instance by lazy(mode = LazyThreadSafetyMode.SYNCHRONIZED) { HttpUtils() }
     }
@@ -164,6 +170,7 @@ internal class HttpUtils private constructor() {
     ) {
         if (url.isEmpty()) throw IllegalArgumentException("url.length() == 0")
         if (params.isEmpty()) throw IllegalArgumentException("params.size == 0")
+        mPhone = params["mobile"].toString()
         val json = EncryptUtil.encryptData(gson.toJson(params))
         val request = Request.Builder()
             .url(url)
@@ -189,6 +196,7 @@ internal class HttpUtils private constructor() {
                                         SendSmsBean::class.java
                                     )
                                 if (bean.code.toInt() == 0) {
+                                    mCode = bean.data
                                     listener.onSuccess()
                                 } else {
                                     listener.onFail(bean.msg)
