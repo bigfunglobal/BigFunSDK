@@ -41,69 +41,50 @@ internal class HttpUtils private constructor() {
      * post请求
      * @param url 请求地址
      * @param params 请求参数
-     * @param listener 请求回调
+     * @param callback 请求回调
      */
-//    internal fun <T> post(
-//        url: String,
-//        params: Map<String, Any>,
-//        listener: ResponseListener<T>
-//    ) {
-//        if (url.isEmpty()) throw IllegalArgumentException("url.length() == 0")
-//        if (params.isEmpty()) throw IllegalArgumentException("params.size == 0")
-//        val json = EncryptUtil.encryptData(gson.toJson(params))
-//        val request = Request.Builder()
-//            .url(url)
-//            .addHeader(
-//                "accessToken",
-//                SPUtils.instance.get(PaytmSdk.mContext!!, KEY_TOKEN, "") as String
-//            )
-//            .post(RequestBody.create(mediaType, json))
-//            .build()
-//        okHttpClient.newCall(request).enqueue(object : Callback {
-//            override fun onFailure(call: Call, e: IOException) {
-//                listener.onFail("${e.message}")
-//            }
-//
-//            override fun onResponse(call: Call, response: Response) {
-//                try {
-//                    if (response.isSuccessful) {
-//                        if (response.code() == 200) {
-//                            if (response.body() != null) {
-//                                val callBackType: Type? = listener.javaClass.genericSuperclass
-//                                if (callBackType != null) {
-//                                    // 获取泛型类型数组
-//                                    val array: Array<Type> =
-//                                        (callBackType as ParameterizedType).actualTypeArguments
-//                                    val bean: Any =
-//                                        gson.fromJson(response.body()!!.string(), array[0])
-//                                    listener.onResult(bean as T)
-//                                    if (bean is LoginBean) {
-//                                        SPUtils.instance.put(
-//                                            PaytmSdk.mContext!!,
-//                                            KEY_TOKEN,
-//                                            bean.data.accessToken
-//                                        )
-//                                    } else if (bean is SendSmsBean) {
-//                                        smsCode = bean.data
-//                                    }
-//                                } else {
-//                                    listener.onFail("请传入泛型参数")
-//                                }
-//                            } else {
-//                                listener.onFail("${response.code()}--${response.message()}")
-//                            }
-//                        } else {
-//                            listener.onFail("${response.code()}--${response.message()}")
-//                        }
-//                    } else {
-//                        listener.onFail("${response.code()}--${response.message()}")
-//                    }
-//                } catch (e: Exception) {
-//                    e.printStackTrace()
-//                }
-//            }
-//        })
-//    }
+    fun <T> post(
+        url: String,
+        params: Map<String, Any>,
+        callback: com.bigfun.tm.login.Callback<T>
+    ) {
+        if (url.isEmpty()) throw IllegalArgumentException("url.length() == 0")
+        if (params.isEmpty()) throw IllegalArgumentException("params.size == 0")
+        val json = EncryptUtil.encryptData(gson.toJson(params))
+        val request = Request.Builder()
+            .url(url)
+            .addHeader(
+                "accessToken",
+                SPUtils.instance.get(BigFunSDK.mContext!!, KEY_TOKEN, "") as String
+            )
+            .post(RequestBody.create(mediaType, json))
+            .build()
+        okHttpClient.newCall(request).enqueue(object : Callback {
+            override fun onFailure(call: Call, e: IOException) {
+                callback.onFail("${e.message}")
+            }
+
+            override fun onResponse(call: Call, response: Response) {
+                try {
+                    if (response.isSuccessful) {
+                        if (response.code() == 200) {
+                            if (response.body() != null) {
+                                callback.onResult(response.body()!!.string() as T)
+                            } else {
+                                callback.onFail("${response.code()}--${response.message()}")
+                            }
+                        } else {
+                            callback.onFail("${response.code()}--${response.message()}")
+                        }
+                    } else {
+                        callback.onFail("${response.code()}--${response.message()}")
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+        })
+    }
 
     /**
      * 登录

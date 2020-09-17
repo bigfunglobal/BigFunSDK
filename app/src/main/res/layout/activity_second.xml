@@ -63,7 +63,19 @@
     <Button
         android:id="@+id/btn_fb_login"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btn_get_recharge_channel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取可用充值通道" />
+
+    <Button
+        android:id="@+id/btn_get_withdraw_channel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="获取可用提现通道" />
 
     <TextView
         android:id="@+id/tv"

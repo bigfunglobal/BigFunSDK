@@ -28,11 +28,6 @@ class SecondActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
-        BigFunSDK.init(
-            applicationContext,
-            "test_fb",
-            "EUXLRCIKPVWBYEJW"
-        )
 
         btn_order.setOnClickListener {
             BigFunSDK.getInstance().rechargeOrder(
@@ -99,14 +94,14 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_send_sms.setOnClickListener {
-            val map = mutableMapOf<String,Any>()
-            map.put("authCode","google用户信息对应的id")
-            map.put("email","邮箱")
-            map.put("sex","性别")
-            map.put("age","年龄")
-            map.put("nickName","昵称")
-            map.put("headImg","头像")
-            BigFunSDK.getInstance().googleLogin(map,object :ResponseListener{
+            val map = mutableMapOf<String, Any>()
+            map.put("authCode", "google用户信息对应的id")
+            map.put("email", "邮箱")
+            map.put("sex", "性别")
+            map.put("age", "年龄")
+            map.put("nickName", "昵称")
+            map.put("headImg", "头像")
+            BigFunSDK.getInstance().googleLogin(map, object : ResponseListener {
                 override fun onSuccess() {
 
                 }
@@ -129,6 +124,30 @@ class SecondActivity : AppCompatActivity() {
 
                 override fun onComplete(jsonObject: JSONObject?) {
                     Log.d(TAG, "onComplete: ")
+                }
+            })
+        }
+
+        btn_get_recharge_channel.setOnClickListener {
+            BigFunSDK.getInstance().getRechargeChannel(object : Callback<String> {
+                override fun onResult(result: String?) {
+                    Log.d(TAG, "onResult: $result")
+                }
+
+                override fun onFail(msg: String?) {
+                    Log.d(TAG, "onFail: $msg")
+                }
+            })
+        }
+
+        btn_get_withdraw_channel.setOnClickListener {
+            BigFunSDK.getInstance().getWithdrawChannel(object : Callback<String> {
+                override fun onResult(result: String?) {
+                    Log.d(TAG, "onResult: $result")
+                }
+
+                override fun onFail(msg: String?) {
+                    Log.d(TAG, "onFail: $msg")
                 }
             })
         }

@@ -26,3 +26,13 @@ const val WITHDRAW_ORDER = "${BASE_URL}sdkpayment/trans"
  * 获取渠道配置
  */
 const val GET_CHANNEL_CONFIG = "${BASE_URL}sdkapp/getgameconfig"
+
+/**
+ * 获取可用的充值通道
+ */
+const val GET_RECHARGE_CHANNEL = "${BASE_URL}sdkpayment/QueryPaymentPassageByChannelCode"
+
+/**
+ * 获取可用的提现通道
+ */
+const val GET_WITHDRAW_CHANNEL = "${BASE_URL}sdkpayment/QueryPayoutPassageByChannelCode"

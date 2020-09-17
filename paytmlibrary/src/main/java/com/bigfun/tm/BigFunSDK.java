@@ -26,6 +26,10 @@ public class BigFunSDK {
     private static String mChannel;
     private static String mKey;
     private static BigFunSDK instance;
+    /**
+     * 是否是Debug模式
+     */
+    static boolean isDebug = false;
 
     private BigFunSDK() {
 
@@ -37,6 +41,16 @@ public class BigFunSDK {
         mChannel = channel;
         mKey = key;
         loginByToken();
+        LogUtils.log("sdk init success");
+    }
+
+    /**
+     * 设置是否是Debug模式d
+     *
+     * @param debug
+     */
+    public static void setDebug(boolean debug) {
+        isDebug = debug;
     }
 
     @Keep
@@ -59,7 +73,6 @@ public class BigFunSDK {
     @Keep
     public void login(Map<String, Object> params, ResponseListener listener) {
         new Thread(() -> {
-            check();
             if (!params.containsKey("loginType")) {
                 throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
             }
@@ -123,6 +136,9 @@ public class BigFunSDK {
      */
     @Keep
     public void guestLogin(ResponseListener listener) {
+        if (checkSdkNotInit()) {
+            return;
+        }
         Map<String, Object> map = new HashMap<>();
         map.put("loginType", 1);
         login(map, listener);
@@ -133,6 +149,9 @@ public class BigFunSDK {
      */
     @Keep
     public void phoneLogin(Map<String, Object> params, ResponseListener listener) {
+        if (checkSdkNotInit()) {
+            return;
+        }
         if (!params.containsKey("mobile")
         ) {
             throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
@@ -147,7 +166,9 @@ public class BigFunSDK {
      */
     @Keep
     private void sendSms(Map<String, Object> params, ResponseListener listener) {
-        check();
+        if (checkSdkNotInit()) {
+            return;
+        }
         if (!params.containsKey("mobile")) {
             throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
         }
@@ -192,7 +213,9 @@ public class BigFunSDK {
             Activity activity,
             ResponseListener listener
     ) {
-        check();
+        if (checkSdkNotInit()) {
+            return;
+        }
         if (!params.containsKey("outUserId") || !params.containsKey("outOrderNo") || !params.containsKey(
                 "commodityId"
         )
@@ -222,7 +245,9 @@ public class BigFunSDK {
      */
     @Keep
     public <T> void getChannelConfig(Callback<T> callback) {
-        check();
+        if (checkSdkNotInit()) {
+            return;
+        }
         treeMap.clear();
         treeMap.put("channelCode", mChannel);
         sb.delete(0, sb.length());
@@ -246,7 +271,7 @@ public class BigFunSDK {
     private static void loginByToken() {
         new Thread(() -> {
             if (TextUtils.isEmpty(mChannel) || mContext == null) {
-                throw new IllegalArgumentException(ConstantKt.PAY_TAG + "not init,please init sdk");
+                LogUtils.log("sdk not init");
             }
             String phone = (String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_LOGIN_PHONE, "");
             if (TextUtils.isEmpty(phone)) {
@@ -328,6 +353,9 @@ public class BigFunSDK {
      */
     @Keep
     public void googleLogin(Map<String, Object> params, ResponseListener listener) {
+        if (checkSdkNotInit()) {
+            return;
+        }
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 4);
         login(map, listener);
@@ -336,10 +364,12 @@ public class BigFunSDK {
     /**
      * 检查是否初始化
      */
-    private void check() {
-        if (TextUtils.isEmpty(mChannel) || mContext == null) {
-            throw new IllegalArgumentException(ConstantKt.PAY_TAG + "not init,please init sdk");
+    private boolean checkSdkNotInit() {
+        if (TextUtils.isEmpty(mChannel) || mContext == null || TextUtils.isEmpty(mKey)) {
+            LogUtils.log("sdk not init");
+            return true;
         }
+        return false;
     }
 
     /**
@@ -351,5 +381,52 @@ public class BigFunSDK {
             return data.getStringExtra("nativeSdkForMerchantMessage").isEmpty();
         }
         return false;
+    }
+
+    /**
+     * 获取可用的支付通道
+     */
+    @Keep
+    public <T> void getRechargeChannel(Callback<T> callback) {
+        if (checkSdkNotInit()) {
+            return;
+        }
+        treeMap.clear();
+        sb.delete(0, sb.length());
+        treeMap.put("channelCode", mChannel);
+        for (String key : treeMap.keySet()) {
+            sb.append(key).append("=").append(treeMap.get(key)).append("&");
+        }
+        sb.append("key=").append(mKey);
+        String sign = MD5Utils.getMD5Standard(sb.toString());
+        Map<String, Object> map = new HashMap<>();
+        map.put("channelCode", mChannel);
+        map.put("sign", sign);
+        HttpUtils.getInstance().post(NetConstantKt.GET_RECHARGE_CHANNEL, map, callback);
+    }
+
+    /**
+     * 获取可用提现通道
+     *
+     * @param callback
+     * @param <T>
+     */
+    @Keep
+    public <T> void getWithdrawChannel(Callback<T> callback) {
+        if (checkSdkNotInit()) {
+            return;
+        }
+        treeMap.clear();
+        sb.delete(0, sb.length());
+        treeMap.put("channelCode", mChannel);
+        for (String key : treeMap.keySet()) {
+            sb.append(key).append("=").append(treeMap.get(key)).append("&");
+        }
+        sb.append("key=").append(mKey);
+        String sign = MD5Utils.getMD5Standard(sb.toString());
+        Map<String, Object> map = new HashMap<>();
+        map.put("channelCode", mChannel);
+        map.put("sign", sign);
+        HttpUtils.getInstance().post(NetConstantKt.GET_WITHDRAW_CHANNEL, map, callback);
     }
 }

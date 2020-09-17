@@ -60,7 +60,3 @@ fun getWifiIp(ip: Int): String {
     sb.append(ip shr 24 and 0xFF)
     return sb.toString()
 }
-
-fun throwException(message: String) {
-    throw BigFunSDKException("$PAY_TAG$message")
-}
