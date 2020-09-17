@@ -102,7 +102,7 @@ class PayUtils private constructor() {
             map["mid"],
             map["txnToken"],
             bean.outPayAmount.toString(),
-            "https://securegw-stage.paytm.in/theia/paytmCallback?ORDER_ID=${map["orderId"]}"
+            "https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=${map["orderId"]}"
         )
         val transactionManager =
             TransactionManager(paytmOrder, object : PaytmPaymentTransactionCallback {
