@@ -55,12 +55,6 @@
         android:text="发送短信" />
 
     <Button
-        android:id="@+id/btn_with_order"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="提现下单" />
-
-    <Button
         android:id="@+id/btn_is_login"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

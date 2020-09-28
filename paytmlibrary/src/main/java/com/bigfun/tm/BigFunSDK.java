@@ -36,11 +36,11 @@ public class BigFunSDK {
     }
 
     @Keep
-    public static void init(Context context, String channel, String key) {
+    public void init(Context context, String channel, String key) {
         mContext = context;
         mChannel = channel;
         mKey = key;
-        loginByToken();
+        guestLogin2();
         LogUtils.log("sdk init success");
     }
 
@@ -142,6 +142,25 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>();
         map.put("loginType", 1);
         login(map, listener);
+    }
+
+    private void guestLogin2() {
+        if (checkSdkNotInit()) {
+            return;
+        }
+        Map<String, Object> map = new HashMap<>();
+        map.put("loginType", 1);
+        login(map, new ResponseListener() {
+            @Override
+            public void onSuccess() {
+
+            }
+
+            @Override
+            public void onFail(String msg) {
+
+            }
+        });
     }
 
     /**

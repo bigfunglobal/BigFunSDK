@@ -14,7 +14,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
         BigFunSDK.setDebug(true)
-        BigFunSDK.init(
+        BigFunSDK.getInstance().init(
             applicationContext,
             "test_fb",
             "EUXLRCIKPVWBYEJW"
