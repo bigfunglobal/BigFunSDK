@@ -141,12 +141,14 @@ internal class HttpUtils private constructor() {
                                     )
                                     listener.onSuccess()
                                 } else {
+                                    SPUtils.instance.remove(BigFunSDK.mContext, "channel")
                                     listener.onFail(loginBean.msg)
                                 }
                             } else {
                                 listener.onFail(response.message())
                             }
                         } else {
+                            SPUtils.instance.remove(BigFunSDK.mContext, "channel")
                             listener.onFail(response.message())
                         }
                     } else {

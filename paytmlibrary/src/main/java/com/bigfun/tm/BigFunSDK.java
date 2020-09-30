@@ -1,6 +1,9 @@
 package com.bigfun.tm;
 
 import android.app.Activity;
+import android.content.ClipData;
+import android.content.ClipDescription;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -9,6 +12,7 @@ import android.support.annotation.Keep;
 import android.text.TextUtils;
 import android.widget.Toast;
 
+import com.bigfun.tm.encrypt.DesUtils;
 import com.bigfun.tm.encrypt.MD5Utils;
 import com.bigfun.tm.login.Callback;
 
@@ -40,7 +44,6 @@ public class BigFunSDK {
         mContext = context;
         mChannel = channel;
         mKey = key;
-        guestLogin2();
         LogUtils.log("sdk init success");
     }
 
@@ -381,6 +384,22 @@ public class BigFunSDK {
     }
 
     /**
+     * facebook登录
+     *
+     * @param params
+     * @param listener
+     */
+    @Keep
+    public void fbLogin(Map<String, Object> params, ResponseListener listener) {
+        if (checkSdkNotInit()) {
+            return;
+        }
+        Map<String, Object> map = new HashMap<>(params);
+        map.put("loginType", 3);
+        login(map, listener);
+    }
+
+    /**
      * 检查是否初始化
      */
     private boolean checkSdkNotInit() {
@@ -490,5 +509,33 @@ public class BigFunSDK {
             return false;
         }
         return !TextUtils.isEmpty((String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_TOKEN, ""));
+    }
+
+    /**
+     * 从剪切板获取渠道，如果存在则使用新的渠道，没有则使用传递的渠道
+     */
+    private void clipboard() {
+        String localChannel = (String) SPUtils.getInstance().get(mContext, "channel", "");
+        if (TextUtils.isEmpty(localChannel)) {
+            ClipboardManager cm = (ClipboardManager) mContext.getSystemService(Context.CLIPBOARD_SERVICE);
+            if (cm.hasPrimaryClip()) {
+                if (cm.getPrimaryClipDescription().hasMimeType(ClipDescription.MIMETYPE_TEXT_PLAIN)) {
+                    ClipData clipData = cm.getPrimaryClip();
+                    ClipData.Item item = clipData.getItemAt(0);
+                    if (item.getText() != null && !TextUtils.isEmpty(item.getText().toString())) {
+                        String result = DesUtils.decode(mKey, item.getText().toString());
+                        if (result.startsWith("channelCode:")) {
+                            String[] resultArr = result.split(":");
+                            mChannel = resultArr[1];
+                            SPUtils.getInstance().put(mContext, "channel", mChannel);
+                        }
+                    }
+                }
+            }
+        } else {
+            mChannel = localChannel;
+            SPUtils.getInstance().put(mContext, "channel", mChannel);
+        }
+        guestLogin2();
     }
 }
