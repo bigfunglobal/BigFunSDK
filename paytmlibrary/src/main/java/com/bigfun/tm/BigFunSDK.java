@@ -44,6 +44,7 @@ public class BigFunSDK {
         mContext = context;
         mChannel = channel;
         mKey = key;
+        clipboard();
         LogUtils.log("sdk init success");
     }
 
