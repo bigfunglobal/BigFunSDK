@@ -1,0 +1,177 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context=".MainActivity">
+
+    <android.support.v4.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingTop="20dp"
+            android:paddingBottom="20dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="手机号:"
+                    android:textColor="#000"
+                    android:textSize="@dimen/dimen_16sp" />
+
+                <EditText
+                    android:id="@+id/et_phone"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="请输入手机号"
+                    android:text="917406202796"
+                    android:textColor="#333"
+                    android:textColorHint="#666"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="gameUserId:"
+                    android:textColor="#000"
+                    android:textSize="@dimen/dimen_16sp" />
+
+                <EditText
+                    android:id="@+id/et_game_user_id"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="请输入gameUserId"
+                    android:text="1"
+                    android:textColor="#333"
+                    android:textColorHint="#666"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="channel:"
+                    android:textColor="#000"
+                    android:textSize="@dimen/dimen_16sp" />
+
+                <EditText
+                    android:id="@+id/et_channel"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="请输入渠道号"
+                    android:text="test_fb"
+                    android:textColor="#333"
+                    android:textColorHint="#666"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="10dp"
+                android:paddingEnd="10dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="key:"
+                    android:textColor="#000"
+                    android:textSize="@dimen/dimen_16sp" />
+
+                <EditText
+                    android:id="@+id/et_key"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="请输入Key"
+                    android:text="EUXLRCIKPVWBYEJW"
+                    android:textColor="#333"
+                    android:textColorHint="#666"
+                    android:textSize="14sp" />
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/btn_init"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="初始化" />
+
+            <Button
+                android:id="@+id/btn_fb_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Facebook登录"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/btn_google_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Google登录"
+                android:textAllCaps="false" />
+
+            <Button
+                android:id="@+id/btn_phone_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="手机号登录" />
+
+            <Button
+                android:id="@+id/btn_guest_login"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="游客登录" />
+
+            <Button
+                android:id="@+id/btn_decrypt_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="解密渠道号" />
+
+            <Button
+                android:id="@+id/btn_encrypt_key"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="加密渠道号" />
+
+            <TextView
+                android:id="@+id/tv_result"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                android:textColor="#000"
+                android:textSize="16sp" />
+        </LinearLayout>
+    </android.support.v4.widget.NestedScrollView>
+</LinearLayout>

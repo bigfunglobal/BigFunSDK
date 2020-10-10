@@ -15,7 +15,7 @@ internal class HttpUtils private constructor() {
 
     private val mediaType = MediaType.get("application/json; charset=utf-8")
     private val token by lazy {
-        SPUtils.instance.get(BigFunSDK.mContext, "accessToken", "") as String
+        SPUtils.getInstance().get(BigFunSDK.mContext, "accessToken", "") as String
     }
 
     companion object {
@@ -61,7 +61,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSDK.mContext!!, KEY_TOKEN, "") as String
+                SPUtils.getInstance().get(BigFunSDK.mContext!!, Constant.KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -107,7 +107,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
+                SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -127,28 +127,28 @@ internal class HttpUtils private constructor() {
                                     val loginType = params["loginType"] as Int
                                     if (loginType == 2) {
                                         params["mobile"]?.apply {
-                                            SPUtils.instance.put(
+                                            SPUtils.getInstance().put(
                                                 BigFunSDK.mContext,
-                                                KEY_LOGIN_PHONE,
+                                                Constant.KEY_LOGIN_PHONE,
                                                 this
                                             )
                                         }
                                     }
-                                    SPUtils.instance.put(
+                                    SPUtils.getInstance().put(
                                         BigFunSDK.mContext,
-                                        KEY_TOKEN,
+                                        Constant.KEY_TOKEN,
                                         loginBean.data.accessToken
                                     )
                                     listener.onSuccess()
                                 } else {
-                                    SPUtils.instance.remove(BigFunSDK.mContext, "channel")
+                                    SPUtils.getInstance().remove(BigFunSDK.mContext, "channel")
                                     listener.onFail(loginBean.msg)
                                 }
                             } else {
                                 listener.onFail(response.message())
                             }
                         } else {
-                            SPUtils.instance.remove(BigFunSDK.mContext, "channel")
+                            SPUtils.getInstance().remove(BigFunSDK.mContext, "channel")
                             listener.onFail(response.message())
                         }
                     } else {
@@ -178,7 +178,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
+                SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -279,7 +279,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
+                SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()
@@ -301,7 +301,7 @@ internal class HttpUtils private constructor() {
                                 if (bean.code.toInt() == 0) {
                                     if (bean.data != null) {
                                         listener.onSuccess()
-                                        PayUtils.instance.pay(
+                                        PayUtils.getInstance().pay(
                                             bean.data,
                                             activity,
                                             requestCode,
@@ -345,7 +345,7 @@ internal class HttpUtils private constructor() {
             .url(url)
             .addHeader(
                 "accessToken",
-                SPUtils.instance.get(BigFunSDK.mContext, KEY_TOKEN, "") as String
+                SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "") as String
             )
             .post(RequestBody.create(mediaType, json))
             .build()

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "730728371107",
+    "firebase_url": "https://bigfuntool-63ad0.firebaseio.com",
+    "project_id": "bigfuntool-63ad0",
+    "storage_bucket": "bigfuntool-63ad0.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:730728371107:android:e87c7049d9c8a0a442c016",
+        "android_client_info": {
+          "package_name": "com.yl.bigfuntool"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "730728371107-9c1a1flupvr5j411cu0ej8uo5hmvak82.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.yl.bigfuntool",
+            "certificate_hash": "763c62e90da1b329be3cf30f85368741bdd86484"
+          }
+        },
+        {
+          "client_id": "730728371107-pqqejc9mof8l5peuke2pj9iq9opnoina.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5COK1iOIMCs6aU2tIqwfWi7eZWHs7kBM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "730728371107-pqqejc9mof8l5peuke2pj9iq9opnoina.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

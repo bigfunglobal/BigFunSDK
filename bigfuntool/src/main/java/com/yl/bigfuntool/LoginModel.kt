@@ -1,13 +1,12 @@
-package com.bigfun.tm.login
+package com.yl.bigfuntool
 
 import android.app.Activity
 import android.os.Bundle
-import com.bigfun.tm.BigFunSDK
-import com.bigfun.tm.LogUtils
-import com.bigfun.tm.ResponseListener
 import com.facebook.*
 import com.facebook.login.LoginManager
 import com.facebook.login.LoginResult
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import org.json.JSONObject
 import java.util.ArrayList
 
@@ -16,15 +15,15 @@ internal class LoginModel(private val activity: Activity) {
     /**
      * google登录
      */
-//    fun googleLogin(webClientId: String, requestCode: Int) {
-//        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-//            .requestIdToken(webClientId)
-//            .requestEmail()
-//            .build()
-//        val client = GoogleSignIn.getClient(activity, gso)
-//        val signInIntent = client.signInIntent
-//        activity.startActivityForResult(signInIntent, requestCode)
-//    }
+    fun googleLogin(webClientId: String, requestCode: Int) {
+        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
+            .requestEmail()
+            .build()
+        val client = GoogleSignIn.getClient(activity, gso)
+        val signInIntent = client.signInIntent
+        activity.startActivityForResult(signInIntent, requestCode)
+    }
 
     /**
      * fb登录
@@ -57,7 +56,7 @@ internal class LoginModel(private val activity: Activity) {
         val request = GraphRequest.newMeRequest(accessToken) { `object`, _ ->
             if (`object` != null) {
                 listener.onComplete(`object`)
-                login(`object`)
+//                login(`object`)
             } else {
                 listener.onError(FacebookException("login fail"))
             }
@@ -85,14 +84,5 @@ internal class LoginModel(private val activity: Activity) {
                 map["headImg"] = optString("url")
             }
         }
-        BigFunSDK.getInstance().login(map, object : ResponseListener {
-            override fun onSuccess() {
-                LogUtils.log("facebook call login success")
-            }
-
-            override fun onFail(msg: String?) {
-                LogUtils.log("facebook call login fail $msg")
-            }
-        })
     }
 }

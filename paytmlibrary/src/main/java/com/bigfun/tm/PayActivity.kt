@@ -15,7 +15,7 @@ class PayActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pay)
 
-        val url = intent.getStringExtra(EXTRA_KEY_PAY_URL)
+        val url = intent.getStringExtra(Constant.EXTRA_KEY_PAY_URL)
 
         mAgentWeb = AgentWeb.with(this)
             .setAgentWebParent(fl, LinearLayout.LayoutParams(-1, -1))

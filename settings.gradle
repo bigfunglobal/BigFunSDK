@@ -1,3 +1,4 @@
+include ':bigfuntool'
 include ':paytmlibrary'
 include ':app'
 rootProject.name = "BigFunSDK"

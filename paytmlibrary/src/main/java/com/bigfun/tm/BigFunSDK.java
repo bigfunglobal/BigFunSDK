@@ -20,6 +20,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.bigfun.tm.Constant.PAY_TAG;
+
 @Keep
 public class BigFunSDK {
 
@@ -34,6 +36,7 @@ public class BigFunSDK {
      * 是否是Debug模式
      */
     static boolean isDebug = false;
+    private static String mSource;
 
     private BigFunSDK() {
 
@@ -77,8 +80,8 @@ public class BigFunSDK {
     @Keep
     public void login(Map<String, Object> params, ResponseListener listener) {
         new Thread(() -> {
-            if (!params.containsKey("loginType")) {
-                throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
+            if (!params.containsKey("loginType") || !params.containsKey("gameUserId")) {
+                throw new IllegalArgumentException(PAY_TAG + "loginType,gameUserId is required");
             }
             Map<String, Object> map = new HashMap<>(params);
             map.put("deviceType", "Android");
@@ -91,8 +94,10 @@ public class BigFunSDK {
                 map.put("aaid", "111111111111111111111111111");
             }
             map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
-            map.put("ip", UtilsKt.getIp(mContext));
+            map.put("ip", IpUtils.getOutNetIP(mContext, 0));
             map.put("channelCode", mChannel);
+            map.put("verCode", UtilsKt.getVersionName(mContext));
+            map.put("source", mSource);
             if (!map.containsKey("email")) {
                 map.put("email", "");
             }
@@ -111,9 +116,6 @@ public class BigFunSDK {
             if (!map.containsKey("mobile")) {
                 map.put("mobile", "0");
             }
-            if (!map.containsKey("gameUserId")) {
-                map.put("gameUserId", 0);
-            }
             if (!map.containsKey("authCode")) {
                 map.put("authCode", "");
             }
@@ -131,7 +133,7 @@ public class BigFunSDK {
             sb.append("key=").append(mKey);
             String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
             map.put("sign", sign);
-            HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, listener);
+            HttpUtils.getInstance().login(NetConstant.LOGIN, map, listener);
         }).start();
     }
 
@@ -139,21 +141,22 @@ public class BigFunSDK {
      * 游客登录
      */
     @Keep
-    public void guestLogin(ResponseListener listener) {
+    public void guestLogin(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
-        Map<String, Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 1);
         login(map, listener);
     }
 
-    private void guestLogin2() {
+    private void initLogin() {
         if (checkSdkNotInit()) {
             return;
         }
         Map<String, Object> map = new HashMap<>();
         map.put("loginType", 1);
+        map.put("gameUserId", 0);
         login(map, new ResponseListener() {
             @Override
             public void onSuccess() {
@@ -177,7 +180,15 @@ public class BigFunSDK {
         }
         if (!params.containsKey("mobile")
         ) {
-            throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
+            throw new IllegalArgumentException(PAY_TAG + "mobile is required");
+        }
+        if (params.get("mobile").toString().length() != 12 && params.get("mobile").toString().length() != 10) {
+            Toast.makeText(
+                    mContext,
+                    "Please fill in the correct phone number",
+                    Toast.LENGTH_SHORT
+            ).show();
+            return;
         }
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 2);
@@ -193,7 +204,7 @@ public class BigFunSDK {
             return;
         }
         if (!params.containsKey("mobile")) {
-            throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
+            throw new IllegalArgumentException(PAY_TAG + "mobile is required");
         }
         mPhone = params.get("mobile").toString();
         if (mPhone.length() != 12 && mPhone.length() != 10) {
@@ -224,7 +235,7 @@ public class BigFunSDK {
         map.put("codeType", 2);
         map.put("channelCode", mChannel);
         map.put("sign", sign);
-        HttpUtils.getInstance().sendSms(NetConstantKt.SEND_SMS, map, listener);
+        HttpUtils.getInstance().sendSms(NetConstant.SEND_SMS, map, listener);
     }
 
     /**
@@ -243,7 +254,7 @@ public class BigFunSDK {
                 "commodityId"
         )
         ) {
-            throw new IllegalArgumentException(ConstantKt.PAY_TAG + "缺少参数");
+            throw new IllegalArgumentException(PAY_TAG + "缺少参数");
         }
         Map<String, Object> map = new HashMap<>();
         treeMap.clear();
@@ -260,7 +271,7 @@ public class BigFunSDK {
         map.putAll(params);
         map.put("sign", sign);
         map.put("channelCode", mChannel);
-        HttpUtils.getInstance().paymentOrder(NetConstantKt.RECHARGE_ORDER, map, activity, 100, listener);
+        HttpUtils.getInstance().paymentOrder(NetConstant.RECHARGE_ORDER, map, activity, 100, listener);
     }
 
     /**
@@ -284,7 +295,7 @@ public class BigFunSDK {
         map.put("ip", UtilsKt.getIp(mContext));
         map.put("gameUserId", "0");
         map.put("channelCode", mChannel);
-        HttpUtils.getInstance().getChannelConfig(NetConstantKt.GET_CHANNEL_CONFIG, map, callback);
+        HttpUtils.getInstance().getChannelConfig(NetConstant.GET_CHANNEL_CONFIG, map, callback);
     }
 
     /**
@@ -296,7 +307,7 @@ public class BigFunSDK {
             if (TextUtils.isEmpty(mChannel) || mContext == null) {
                 LogUtils.log("sdk not init");
             }
-            String phone = (String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_LOGIN_PHONE, "");
+            String phone = (String) SPUtils.getInstance().get(mContext, Constant.KEY_LOGIN_PHONE, "");
             if (TextUtils.isEmpty(phone)) {
                 return;
             }
@@ -354,7 +365,7 @@ public class BigFunSDK {
             sb.append("key=").append(mKey);
             String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
             map.put("sign", sign);
-            HttpUtils.getInstance().login(NetConstantKt.LOGIN, map, new ResponseListener() {
+            HttpUtils.getInstance().login(NetConstant.LOGIN, map, new ResponseListener() {
                 @Override
                 public void onSuccess() {
 
@@ -379,6 +390,10 @@ public class BigFunSDK {
         if (checkSdkNotInit()) {
             return;
         }
+        if (!params.containsKey("nickName") || TextUtils.isEmpty(params.get("nickName").toString())
+                || !params.containsKey("headImg") || TextUtils.isEmpty(params.get("headImg").toString())) {
+            throw new IllegalArgumentException("nickName and headImg is required");
+        }
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 4);
         login(map, listener);
@@ -387,7 +402,6 @@ public class BigFunSDK {
     /**
      * facebook登录
      *
-     * @param params
      * @param listener
      */
     @Keep
@@ -441,7 +455,7 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>();
         map.put("channelCode", mChannel);
         map.put("sign", sign);
-        HttpUtils.getInstance().post(NetConstantKt.GET_RECHARGE_CHANNEL, map, callback);
+        HttpUtils.getInstance().post(NetConstant.GET_RECHARGE_CHANNEL, map, callback);
     }
 
     /**
@@ -466,7 +480,7 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>();
         map.put("channelCode", mChannel);
         map.put("sign", sign);
-        HttpUtils.getInstance().post(NetConstantKt.GET_WITHDRAW_CHANNEL, map, callback);
+        HttpUtils.getInstance().post(NetConstant.GET_WITHDRAW_CHANNEL, map, callback);
     }
 
     /**
@@ -509,7 +523,7 @@ public class BigFunSDK {
         if (checkSdkNotInit()) {
             return false;
         }
-        return !TextUtils.isEmpty((String) SPUtils.getInstance().get(mContext, ConstantKt.KEY_TOKEN, ""));
+        return !TextUtils.isEmpty((String) SPUtils.getInstance().get(mContext, Constant.KEY_TOKEN, ""));
     }
 
     /**
@@ -525,9 +539,16 @@ public class BigFunSDK {
                     ClipData.Item item = clipData.getItemAt(0);
                     if (item.getText() != null && !TextUtils.isEmpty(item.getText().toString())) {
                         String result = DesUtils.decode(mKey, item.getText().toString());
-                        if (result.startsWith("channelCode:")) {
-                            String[] resultArr = result.split(":");
-                            mChannel = resultArr[1];
+                        if (result.startsWith("|")) {
+                            String[] resultArr = result.split("|");
+                            String channel = resultArr[0];
+                            String source = resultArr[1];
+                            if (!TextUtils.isEmpty(channel)) {
+                                mChannel = channel;
+                            }
+                            if (!TextUtils.isEmpty(source)) {
+                                mSource = source;
+                            }
                             SPUtils.getInstance().put(mContext, "channel", mChannel);
                         }
                     }
@@ -537,6 +558,6 @@ public class BigFunSDK {
             mChannel = localChannel;
             SPUtils.getInstance().put(mContext, "channel", mChannel);
         }
-        guestLogin2();
+        initLogin();
     }
 }

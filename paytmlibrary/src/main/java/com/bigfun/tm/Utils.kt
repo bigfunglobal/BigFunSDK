@@ -1,6 +1,8 @@
 package com.bigfun.tm
 
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.net.ConnectivityManager
 import android.net.wifi.WifiManager
 import java.net.Inet4Address
@@ -59,4 +61,17 @@ fun getWifiIp(ip: Int): String {
     sb.append(ip shr 16 and 0xFF).append(".")
     sb.append(ip shr 24 and 0xFF)
     return sb.toString()
+}
+
+fun getVersionName(context: Context): String {
+    val manager: PackageManager = context.packageManager
+    var name: String
+    name = try {
+        val info: PackageInfo = manager.getPackageInfo(context.packageName, 0)
+        info.versionName
+    } catch (e: PackageManager.NameNotFoundException) {
+        e.printStackTrace()
+        "1.0.0"
+    }
+    return name
 }

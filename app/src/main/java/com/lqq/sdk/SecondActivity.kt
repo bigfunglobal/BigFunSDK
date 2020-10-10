@@ -54,13 +54,17 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_login.setOnClickListener {
-            BigFunSDK.getInstance().guestLogin(
+            val map = mutableMapOf<String, Any>(
+                "gameUserId" to 1
+            )
+            BigFunSDK.getInstance().guestLogin(map,
                 object : ResponseListener {
                     override fun onSuccess() {
-
+                        Log.d(TAG, "onSuccess: ")
                     }
 
                     override fun onFail(msg: String?) {
+                        Log.d(TAG, "onFail: $msg")
                     }
                 })
         }
