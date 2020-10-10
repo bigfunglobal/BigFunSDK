@@ -4,14 +4,14 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'com.google.gms.google-services'
 
 android {
-    signingConfigs {
-        config {
-            storeFile file('C:\\Users\\Administrator\\Desktop\\jks\\bigfuntool.jks')
-            storePassword '123456'
-            keyAlias 'bigfuntool'
-            keyPassword '123456'
-        }
-    }
+//    signingConfigs {
+//        config {
+//            storeFile file('C:\\Users\\Administrator\\Desktop\\jks\\bigfuntool.jks')
+//            storePassword '123456'
+//            keyAlias 'bigfuntool'
+//            keyPassword '123456'
+//        }
+//    }
     compileSdkVersion 29
     buildToolsVersion "29.0.3"
 
@@ -27,12 +27,12 @@ android {
 
     buildTypes {
         release {
-            signingConfig signingConfigs.config
+//            signingConfig signingConfigs.config
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
-            signingConfig signingConfigs.config
+//            signingConfig signingConfigs.config
         }
     }
 
