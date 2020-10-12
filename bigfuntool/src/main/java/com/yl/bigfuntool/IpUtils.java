@@ -2,7 +2,7 @@ package com.yl.bigfuntool;
 
 import android.content.Context;
 
-import com.bigfun.tm.UtilsKt;
+import com.bigfun.tm.Utils;
 
 import org.json.JSONObject;
 
@@ -62,7 +62,7 @@ public class IpUtils {
                 e.printStackTrace();
             }
         } else {
-            return UtilsKt.getIp(context);
+            return Utils.getIp(context);
         }
         return getOutNetIP(context, ++index);
     }

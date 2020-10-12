@@ -8,13 +8,8 @@ import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.CustomDialog
 import com.bigfun.tm.ResponseListener
 import com.bigfun.tm.login.Callback
-import com.bigfun.tm.login.IFBLoginListener
-import com.bigfun.tm.login.LoginSDK
 import com.facebook.CallbackManager
-import com.facebook.FacebookException
 import kotlinx.android.synthetic.main.activity_second.*
-import org.json.JSONObject
-import java.util.HashMap
 
 
 private const val TAG = "SecondActivity"

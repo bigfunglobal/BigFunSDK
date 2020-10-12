@@ -80,7 +80,7 @@ public class BigFunSDK {
     @Keep
     public void login(Map<String, Object> params, ResponseListener listener) {
         new Thread(() -> {
-            if (!params.containsKey("loginType") || !params.containsKey("gameUserId")) {
+            if (!params.containsKey("loginType") || !params.containsKey("gameUserId") || params.get("gameUserId") == null) {
                 throw new IllegalArgumentException(PAY_TAG + "loginType,gameUserId is required");
             }
             Map<String, Object> map = new HashMap<>(params);
@@ -96,7 +96,7 @@ public class BigFunSDK {
             map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
             map.put("ip", IpUtils.getOutNetIP(mContext, 0));
             map.put("channelCode", mChannel);
-            map.put("verCode", UtilsKt.getVersionName(mContext));
+            map.put("verCode", Utils.getVersionName(mContext));
             map.put("source", mSource);
             if (!map.containsKey("email")) {
                 map.put("email", "");
@@ -292,7 +292,7 @@ public class BigFunSDK {
         String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
         Map<String, Object> map = new HashMap<>();
         map.put("sign", sign);
-        map.put("ip", UtilsKt.getIp(mContext));
+        map.put("ip", IpUtils.getOutNetIP(mContext, 0));
         map.put("gameUserId", "0");
         map.put("channelCode", mChannel);
         HttpUtils.getInstance().getChannelConfig(NetConstant.GET_CHANNEL_CONFIG, map, callback);
@@ -325,7 +325,7 @@ public class BigFunSDK {
                 map.put("aaid", "111111111111111111111111111");
             }
             map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
-            map.put("ip", UtilsKt.getIp(mContext));
+            map.put("ip", IpUtils.getOutNetIP(mContext, 0));
             map.put("channelCode", mChannel);
             if (!map.containsKey("email")) {
                 map.put("email", "");

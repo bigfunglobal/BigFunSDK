@@ -60,7 +60,7 @@ public class IpUtils {
                 e.printStackTrace();
             }
         } else {
-            return UtilsKt.getIp(context);
+            return Utils.getIp(context);
         }
         return getOutNetIP(context, ++index);
     }
