@@ -29,7 +29,9 @@ class SecondActivity : AppCompatActivity() {
                 mapOf(
                     "outUserId" to "0",
                     "outOrderNo" to "774",
-                    "commodityId" to "10RUPEE"
+                    "commodityId" to "10RUPEE",
+                    "mobile" to "7402603943",
+                    "email" to "3859034@qq.com"
                 ),
                 this, object : ResponseListener {
                     override fun onFail(msg: String) {
