@@ -115,7 +115,7 @@ class SecondActivity : AppCompatActivity() {
 
         btn_pay_order.setOnClickListener {
             BigFunSDK.getInstance().payOrder(mutableMapOf<String, Any>(
-                "orderId" to "69668a2f94614f4892edf751520a16d4"
+                "orderId" to et_phone.text.toString().trim()
             ), this, object : ResponseListener {
                 override fun onSuccess() {
                     runOnUiThread {

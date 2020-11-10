@@ -1,7 +1,7 @@
 package com.bigfun.tm;
 
 public interface NetConstant {
-    String BASE_URL = "https://bigfun.xiaoxiangwan.com/api/";
+    String BASE_URL = "https://pay.bmartpay.com/api/";
     /**
      * 登录
      */
