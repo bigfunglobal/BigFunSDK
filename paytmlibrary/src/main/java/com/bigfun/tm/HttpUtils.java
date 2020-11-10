@@ -61,10 +61,6 @@ public class HttpUtils {
             json = EncryptUtil.encryptData(gson.toJson(params));
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader(
-                            "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
-                    )
                     .post(RequestBody.create(mediaType, json))
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -115,10 +111,6 @@ public class HttpUtils {
             json = EncryptUtil.encryptData(gson.toJson(params));
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader(
-                            "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
-                    )
                     .post(RequestBody.create(mediaType, json))
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -185,10 +177,6 @@ public class HttpUtils {
             json = EncryptUtil.encryptData(gson.toJson(params));
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader(
-                            "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
-                    )
                     .post(RequestBody.create(mediaType, json))
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -258,7 +246,6 @@ public class HttpUtils {
             }
             Request request = new Request.Builder()
                     .url(requestUrl.toString())
-                    .addHeader("accessToken", token)
                     .get()
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -290,8 +277,7 @@ public class HttpUtils {
                     .url(url)
                     .addHeader(
                             "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
-                    )
+                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, ""))
                     .post(RequestBody.create(mediaType, json))
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -352,10 +338,6 @@ public class HttpUtils {
             json = EncryptUtil.encryptData(gson.toJson(params));
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader(
-                            "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
-                    )
                     .post(RequestBody.create(mediaType, json))
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {
@@ -404,10 +386,6 @@ public class HttpUtils {
             json = EncryptUtil.encryptData(gson.toJson(params));
             Request request = new Request.Builder()
                     .url(url)
-                    .addHeader(
-                            "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
-                    )
                     .post(RequestBody.create(mediaType, json))
                     .build();
             okHttpClient.newCall(request).enqueue(new Callback() {

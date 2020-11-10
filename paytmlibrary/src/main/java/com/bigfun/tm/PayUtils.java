@@ -32,7 +32,15 @@ public class PayUtils {
                     Activity activity,
                     int requestCode) {
         if (Integer.parseInt(bean.getPaymentChannel()) == 1) {
-            paytm(bean, activity, requestCode);
+            if (Integer.parseInt(bean.getOpenType()) == 5) {
+                paytm(bean, activity, requestCode);
+            } else {
+                activity.runOnUiThread(() -> {
+                    Intent intent = new Intent(activity, PayActivity.class);
+                    intent.putExtra(Constant.EXTRA_KEY_PAY_URL, bean.getJumpUrl());
+                    activity.startActivity(intent);
+                });
+            }
         } else if (Integer.parseInt(bean.getPaymentChannel()) == 0) {
             if (Integer.parseInt(bean.getOpenType()) == 1) {
                 activity.runOnUiThread(() -> {

@@ -10,6 +10,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.Keep;
 import android.text.TextUtils;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.bigfun.tm.encrypt.DesUtils;
@@ -580,6 +581,7 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>();
         treeMap.clear();
         sb.delete(0, sb.length());
+        treeMap.put("orderId", params.get("orderId"));
         for (String key : treeMap.keySet()) {
             sb.append(key).append("=").append(treeMap.get(key)).append("&");
         }
@@ -587,6 +589,7 @@ public class BigFunSDK {
         String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
         map.putAll(params);
         map.put("sign", sign);
+        map.put("channelCode", mChannel);
         HttpUtils.getInstance().payOrder(NetConstant.PAY_URL, map, activity, 100, listener);
     }
 }

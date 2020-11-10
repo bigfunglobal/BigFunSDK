@@ -2,8 +2,6 @@ package com.bigfun.tm;
 
 public interface NetConstant {
     String BASE_URL = "https://bigfun.xiaoxiangwan.com/api/";
-
-//    String BASE_URL = "http://47.241.62.219:8463/api/";
     /**
      * 登录
      */

@@ -115,13 +115,19 @@ class SecondActivity : AppCompatActivity() {
 
         btn_pay_order.setOnClickListener {
             BigFunSDK.getInstance().payOrder(mutableMapOf<String, Any>(
-                "orderId" to "a6e7df35591b42f3832ca7153e4e5c61"
+                "orderId" to "69668a2f94614f4892edf751520a16d4"
             ), this, object : ResponseListener {
                 override fun onSuccess() {
+                    runOnUiThread {
+                        tv.text = "下单成功"
+                    }
                     Log.d(TAG, "onSuccess: 预下单")
                 }
 
                 override fun onFail(msg: String?) {
+                    runOnUiThread {
+                        tv.text = "下单失败$msg"
+                    }
                     Log.d(TAG, "onFail: 预下单--$msg")
                 }
 
