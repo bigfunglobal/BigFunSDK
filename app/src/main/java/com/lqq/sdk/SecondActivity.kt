@@ -11,7 +11,6 @@ import com.bigfun.tm.login.Callback
 import com.facebook.CallbackManager
 import kotlinx.android.synthetic.main.activity_second.*
 
-
 private const val TAG = "SecondActivity"
 const val TOKEN =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYXBpdXNlciIsImFjY291bnQiOiI0Mjc1MiIsImlzcyI6ImpveWNoZWFwIiwiYXVkIjoiMDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjYiLCJleHBpcmVkVGltZSI6MTYwMDk0NjQyMDgzMywiZXhwIjoxNjAwOTQ2NDIwLCJuYmYiOjE1OTkyMTg0MjB9.pGnxoGkghbZBhKxqx029ftIj9RyUehsmvonbm9W7RZ8"
@@ -112,6 +111,21 @@ class SecondActivity : AppCompatActivity() {
 
         btn_is_login.setOnClickListener {
             Log.d(TAG, "onCreate: ${BigFunSDK.getInstance().isLogin}")
+        }
+
+        btn_pay_order.setOnClickListener {
+            BigFunSDK.getInstance().payOrder(mutableMapOf<String, Any>(
+                "orderId" to "a6e7df35591b42f3832ca7153e4e5c61"
+            ), this, object : ResponseListener {
+                override fun onSuccess() {
+                    Log.d(TAG, "onSuccess: 预下单")
+                }
+
+                override fun onFail(msg: String?) {
+                    Log.d(TAG, "onFail: 预下单--$msg")
+                }
+
+            })
         }
     }
 

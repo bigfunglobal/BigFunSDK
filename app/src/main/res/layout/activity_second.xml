@@ -64,4 +64,10 @@
         android:id="@+id/tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <Button
+        android:id="@+id/btn_pay_order"
+        android:layout_width="match_parent"
+        android:text="预充值下单"
+        android:layout_height="wrap_content"/>
 </LinearLayout>

@@ -560,4 +560,33 @@ public class BigFunSDK {
         }
         initLogin();
     }
+
+
+    /**
+     * 充值下单
+     */
+    @Keep
+    public void payOrder(
+            Map<String, Object> params,
+            Activity activity,
+            ResponseListener listener
+    ) {
+        if (checkSdkNotInit()) {
+            return;
+        }
+        if (!params.containsKey("orderId")) {
+            throw new IllegalArgumentException(PAY_TAG + "缺少参数");
+        }
+        Map<String, Object> map = new HashMap<>();
+        treeMap.clear();
+        sb.delete(0, sb.length());
+        for (String key : treeMap.keySet()) {
+            sb.append(key).append("=").append(treeMap.get(key)).append("&");
+        }
+        sb.append("key=").append(mKey);
+        String sign = MD5Utils.getMD5Standard(sb.toString()).toLowerCase();
+        map.putAll(params);
+        map.put("sign", sign);
+        HttpUtils.getInstance().payOrder(NetConstant.PAY_URL, map, activity, 100, listener);
+    }
 }
