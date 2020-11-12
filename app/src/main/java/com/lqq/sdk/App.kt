@@ -16,8 +16,7 @@ class App : Application() {
         BigFunSDK.setDebug(true)
         BigFunSDK.getInstance().init(
             applicationContext,
-            "test_fb",
-            "EUXLRCIKPVWBYEJW"
+            "test_fb"
         )
     }
 }

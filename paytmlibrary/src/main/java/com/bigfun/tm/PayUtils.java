@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.text.TextUtils;
 import android.util.Log;
 
 import com.bigfun.tm.model.PaymentOrderBean;
@@ -31,11 +30,17 @@ public class PayUtils {
 
     public void pay(PaymentOrderBean.DataBean bean,
                     Activity activity,
-                    int requestCode,
-                    String email,
-                    String phone) {
+                    int requestCode) {
         if (Integer.parseInt(bean.getPaymentChannel()) == 1) {
-            paytm(bean, activity, requestCode);
+            if (Integer.parseInt(bean.getOpenType()) == 5) {
+                paytm(bean, activity, requestCode);
+            } else {
+                activity.runOnUiThread(() -> {
+                    Intent intent = new Intent(activity, PayActivity.class);
+                    intent.putExtra(Constant.EXTRA_KEY_PAY_URL, bean.getJumpUrl());
+                    activity.startActivity(intent);
+                });
+            }
         } else if (Integer.parseInt(bean.getPaymentChannel()) == 0) {
             if (Integer.parseInt(bean.getOpenType()) == 1) {
                 activity.runOnUiThread(() -> {
@@ -51,45 +56,12 @@ public class PayUtils {
                 });
             }
         } else {
-            if (!TextUtils.isEmpty(email) && !TextUtils.isEmpty(phone)) {
-                SPUtils.getInstance().put(BigFunSDK.mContext, Constant.KEY_EMAIL, email);
-                SPUtils.getInstance().put(BigFunSDK.mContext, Constant.KEY_PHONE, phone);
-                activity.runOnUiThread(() -> {
-                    Intent intent = new Intent(activity, PayActivity.class);
-                    String url = bean.getJumpUrl().replace("email=null", "email=" + email);
-                    url = url.replace("mobile=null", "mobile=" + phone);
-                    intent.putExtra(Constant.EXTRA_KEY_PAY_URL, url);
-                    activity.startActivity(intent);
-                });
-            } else {
-                String saveEmail =
-                        (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_EMAIL, "");
-                String savePhone =
-                        (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_PHONE, "");
-                if (!TextUtils.isEmpty(saveEmail) && !TextUtils.isEmpty(savePhone)) {
-                    activity.runOnUiThread(() -> {
-                        Intent intent = new Intent(activity, PayActivity.class);
-                        String url = bean.getJumpUrl().replace("email=null", "email=" + saveEmail);
-                        url = url.replace("mobile=null", "mobile=" + savePhone);
-                        intent.putExtra(Constant.EXTRA_KEY_PAY_URL, url);
-                        activity.startActivity(intent);
-                    });
-                } else {
-                    activity.runOnUiThread(() -> {
-                        CustomDialog dialog = new CustomDialog(activity);
-                        dialog.setOnClickListener((email1, phone1) -> {
-                            SPUtils.getInstance().put(BigFunSDK.mContext, Constant.KEY_EMAIL, email1);
-                            SPUtils.getInstance().put(BigFunSDK.mContext, Constant.KEY_PHONE, phone1);
-                            Intent intent = new Intent(activity, PayActivity.class);
-                            String url = bean.getJumpUrl().replace("email=null", "email=" + email1);
-                            url = url.replace("mobile=null", "mobile=" + phone1);
-                            intent.putExtra(Constant.EXTRA_KEY_PAY_URL, url);
-                            activity.startActivity(intent);
-                        });
-                        dialog.show();
-                    });
-                }
-            }
+            activity.runOnUiThread(() -> {
+                Intent intent = new Intent(activity, PayActivity.class);
+                String url = bean.getJumpUrl();
+                intent.putExtra(Constant.EXTRA_KEY_PAY_URL, url);
+                activity.startActivity(intent);
+            });
         }
     }
 

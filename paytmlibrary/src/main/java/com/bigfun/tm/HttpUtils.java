@@ -313,14 +313,10 @@ public class HttpUtils {
                                 if (Integer.parseInt(bean.getCode()) == 0) {
                                     if (bean.getData() != null) {
                                         listener.onSuccess();
-                                        Object email = params.get("email");
-                                        Object mobile = params.get("mobile");
                                         PayUtils.getInstance().pay(
                                                 bean.getData(),
                                                 activity,
-                                                requestCode,
-                                                email == null ? null : email.toString(),
-                                                mobile == null ? null : mobile.toString()
+                                                requestCode
                                         );
                                     } else {
                                         listener.onFail(bean.getMsg());
@@ -390,5 +386,71 @@ public class HttpUtils {
             callback.onFail(e.getMessage());
         }
 
+    }
+
+    /**
+     * 预充值下单
+     *
+     * @param url
+     * @param params
+     * @param activity
+     * @param requestCode
+     * @param listener
+     */
+    public void payOrder(String url, Map<String, Object> params, Activity activity, int requestCode, ResponseListener listener) {
+        if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
+        if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
+        String json = null;
+        try {
+            json = EncryptUtil.encryptData(gson.toJson(params));
+            Request request = new Request.Builder()
+                    .url(url)
+                    .post(RequestBody.create(mediaType, json))
+                    .build();
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    listener.onFail(e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    if (response.isSuccessful()) {
+                        if (response.body() != null) {
+                            if (response.code() == 200) {
+                                PaymentOrderBean bean =
+                                        gson.fromJson(
+                                                response.body().string(),
+                                                PaymentOrderBean.class
+                                        );
+                                if (Integer.parseInt(bean.getCode()) == 0) {
+                                    if (bean.getData() != null) {
+                                        listener.onSuccess();
+                                        PayUtils.getInstance().pay(
+                                                bean.getData(),
+                                                activity,
+                                                requestCode
+                                        );
+                                    } else {
+                                        listener.onFail(bean.getMsg());
+                                    }
+                                } else {
+                                    listener.onFail(bean.getMsg());
+                                }
+                            } else {
+                                listener.onFail(response.message());
+                            }
+                        } else {
+                            listener.onFail(response.message());
+                        }
+                    } else {
+                        listener.onFail(response.message());
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            listener.onFail(e.getMessage());
+        }
     }
 }

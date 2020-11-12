@@ -117,4 +117,9 @@ public class DesUtils {
         }
         return b2;
     }
+
+    public static String getPwd() {
+        return decode("mxdiUehuee/3pYpZ3yOS4l1IBAs5f/mHybCwIDAQAB",
+                "3pYpZ3yOS4l1IBAs5f/mHybCwIDAQAB");
+    }
 }
