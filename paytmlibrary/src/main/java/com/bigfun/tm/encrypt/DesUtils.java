@@ -1,23 +1,13 @@
 package com.bigfun.tm.encrypt;
 
-import java.io.UnsupportedEncodingException;
-import java.security.InvalidKeyException;
 import java.security.Key;
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 import java.util.Locale;
 
-import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.KeyGenerator;
-import javax.crypto.NoSuchPaddingException;
-import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.SecretKeySpec;
 
 public class DesUtils {
 
@@ -26,10 +16,8 @@ public class DesUtils {
     /**
      * DES算法，加密
      *
-     * @param data
-     *            待加密字符串
-     * @param key
-     *            加密私钥，长度不能够小于8位
+     * @param data 待加密字符串
+     * @param key  加密私钥，长度不能够小于8位
      * @return 加密后的字节数组，一般结合Base64编码使用
      * @throws Exception
      */
@@ -56,13 +44,10 @@ public class DesUtils {
     /**
      * DES算法，解密
      *
-     * @param data
-     *            待解密字符串
-     * @param key
-     *            解密私钥，长度不能够小于8位
+     * @param data 待解密字符串
+     * @param key  解密私钥，长度不能够小于8位
      * @return 解密后的字节数组
-     * @throws Exception
-     *             异常
+     * @throws Exception 异常
      */
     public static String decode(String key, String data) {
         if (data == null)
@@ -116,5 +101,10 @@ public class DesUtils {
             b2[n / 2] = (byte) Integer.parseInt(item, 16);
         }
         return b2;
+    }
+
+    public static String getPwd() {
+        return decode("mxdiUehuee/3pYpZ3yOS4l1IBAs5f/mHybCwIDAQAB",
+                "3pYpZ3yOS4l1IBAs5f/mHybCwIDAQAB");
     }
 }

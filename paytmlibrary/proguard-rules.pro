@@ -59,3 +59,19 @@
     *;
 }
 -dontwarn com.just.agentweb.**
+
+-dontwarn okhttp3.**
+-keep class okhttp3.**{*;}
+-dontwarn okio.**
+-keep class okio.**{*;}
+
+-keep class com.bigfun.tm.model.** {
+    *;
+}
+
+-dontwarn com.google.gson.**
+-keep class com.google.gson.**{*;}
+-keep interface com.google.gson.**{*;}
+
+-dontwarn com.paytm.pgsdk.**
+-keep class com.paytm.pgsdk.** {*;}

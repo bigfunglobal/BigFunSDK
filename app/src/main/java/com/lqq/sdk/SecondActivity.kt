@@ -7,6 +7,8 @@ import android.util.Log
 import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.CustomDialog
 import com.bigfun.tm.ResponseListener
+import com.bigfun.tm.encrypt.DesUtils
+import com.bigfun.tm.encrypt.RSAEncrypt
 import com.bigfun.tm.login.Callback
 import com.facebook.CallbackManager
 import kotlinx.android.synthetic.main.activity_second.*
@@ -14,6 +16,7 @@ import kotlinx.android.synthetic.main.activity_second.*
 private const val TAG = "SecondActivity"
 const val TOKEN =
     "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYXBpdXNlciIsImFjY291bnQiOiI0Mjc1MiIsImlzcyI6ImpveWNoZWFwIiwiYXVkIjoiMDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjYiLCJleHBpcmVkVGltZSI6MTYwMDk0NjQyMDgzMywiZXhwIjoxNjAwOTQ2NDIwLCJuYmYiOjE1OTkyMTg0MjB9.pGnxoGkghbZBhKxqx029ftIj9RyUehsmvonbm9W7RZ8"
+const val PASS = "7C5049081A3CD0FA228DC9D2608880E4EA4FED82B3C702D411E1C7C674D6E1F1"
 
 class SecondActivity : AppCompatActivity() {
 
@@ -115,7 +118,7 @@ class SecondActivity : AppCompatActivity() {
 
         btn_pay_order.setOnClickListener {
             BigFunSDK.getInstance().payOrder(mutableMapOf<String, Any>(
-                "orderId" to et_phone.text.toString().trim()
+                "orderId" to "03ebf0ae77c64e02b877bd5e9c9a0c65"
             ), this, object : ResponseListener {
                 override fun onSuccess() {
                     runOnUiThread {
