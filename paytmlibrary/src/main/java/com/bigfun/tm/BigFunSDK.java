@@ -73,7 +73,7 @@ public class BigFunSDK {
      * @param params
      */
     @Keep
-    public void login(Map<String, Object> params, ResponseListener listener) {
+    private void login(Map<String, Object> params, ResponseListener listener) {
         new Thread(() -> {
             if (!params.containsKey("loginType") || !params.containsKey("gameUserId") || params.get("gameUserId") == null) {
                 throw new IllegalArgumentException(PAY_TAG + "loginType,gameUserId is required");
@@ -123,7 +123,7 @@ public class BigFunSDK {
      * 游客登录
      */
     @Keep
-    public void guestLogin(Map<String, Object> params, ResponseListener listener) {
+    private void guestLogin(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -156,7 +156,7 @@ public class BigFunSDK {
      * 手机号登录
      */
     @Keep
-    public void phoneLogin(Map<String, Object> params, ResponseListener listener) {
+    private void phoneLogin(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -181,7 +181,7 @@ public class BigFunSDK {
      * 发送短信
      */
     @Keep
-    public void sendSms(Map<String, Object> params, ResponseListener listener) {
+    private void sendSms(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -214,7 +214,7 @@ public class BigFunSDK {
      * 充值下单
      */
     @Keep
-    public void rechargeOrder(
+    private void rechargeOrder(
             Map<String, Object> params,
             Activity activity,
             ResponseListener listener
@@ -238,7 +238,7 @@ public class BigFunSDK {
      * 获取渠道配置
      */
     @Keep
-    public <T> void getChannelConfig(Callback<T> callback) {
+    private <T> void getChannelConfig(Callback<T> callback) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -323,7 +323,7 @@ public class BigFunSDK {
      * @param listener
      */
     @Keep
-    public void googleLogin(Map<String, Object> params, ResponseListener listener) {
+    private void googleLogin(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -342,7 +342,7 @@ public class BigFunSDK {
      * @param listener
      */
     @Keep
-    public void fbLogin(Map<String, Object> params, ResponseListener listener) {
+    private void fbLogin(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -377,7 +377,7 @@ public class BigFunSDK {
      * 获取可用的支付通道
      */
     @Keep
-    public <T> void getRechargeChannel(Callback<T> callback) {
+    private <T> void getRechargeChannel(Callback<T> callback) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -393,7 +393,7 @@ public class BigFunSDK {
      * @param <T>
      */
     @Keep
-    public <T> void getWithdrawChannel(Callback<T> callback) {
+    private <T> void getWithdrawChannel(Callback<T> callback) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -409,7 +409,7 @@ public class BigFunSDK {
      * @param listener
      */
     @Keep
-    public void loginWithCode(Map<String, Object> params, ResponseListener listener) {
+    private void loginWithCode(Map<String, Object> params, ResponseListener listener) {
         if (checkSdkNotInit()) {
             return;
         }
@@ -438,7 +438,7 @@ public class BigFunSDK {
      * @return
      */
     @Keep
-    public boolean isLogin() {
+    private boolean isLogin() {
         if (checkSdkNotInit()) {
             return false;
         }
