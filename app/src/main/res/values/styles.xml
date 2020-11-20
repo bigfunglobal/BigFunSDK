@@ -7,4 +7,9 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <style name="MyTheme" parent="Theme.AppCompat.Light">
+        <item name="colorPrimary">#FF1F73B7</item>
+        <item name="colorAccent">#FF1F73B7</item>
+        <item name="colorPrimaryDark">#FF1F73B7</item>
+    </style>
 </resources>

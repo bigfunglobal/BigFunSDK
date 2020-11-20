@@ -3,7 +3,7 @@
         <item name="colorPrimaryDark">#4FABF4</item>
     </style>
 
-    <style name="MessagingStyle" parent="Theme.MaterialComponents.Light">
+    <style name="MessagingStyle" parent="Theme.AppCompat.Light">
         <item name="colorPrimary">#FF1F73B7</item>
         <item name="colorAccent">#FF1F73B7</item>
         <item name="colorPrimaryDark">#FF1F73B7</item>
