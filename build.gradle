@@ -23,6 +23,7 @@ allprojects {
             url "https://artifactory.paytm.in/libs-release-local"
         }
         maven { url "https://jitpack.io" }
+        maven { url 'https://zendesk.jfrog.io/zendesk/repo' }
     }
 }
 

@@ -10,6 +10,7 @@ import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.ResponseListener
 import com.facebook.CallbackManager
 import com.facebook.FacebookException
+import com.facebook.appevents.AppEventsLogger
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import kotlinx.android.synthetic.main.activity_main.*
@@ -20,7 +21,7 @@ private const val TAG = "MainActivity"
 const val GOOGLE_SIGN_IN_CODE = 100
 
 class MainActivity : AppCompatActivity() {
-//e0268ed4-39b2-4eef-aab1-66d11eec324e
+    //e0268ed4-39b2-4eef-aab1-66d11eec324e
     private val callbackManager = CallbackManager.Factory.create()
     private lateinit var cm: ClipboardManager
 
@@ -71,7 +72,7 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "请输入渠道号或者Key", Toast.LENGTH_SHORT).show()
             return
         }
-        BigFunSDK.getInstance().init(applicationContext, channel, key)
+        BigFunSDK.getInstance().init(applicationContext, channel)
         tv_result.text = "sdk初始化成功"
     }
 
@@ -297,5 +298,9 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
+    }
+
+    fun logSentFriendRequestEvent() {
+        AppEventsLogger.newLogger(applicationContext).logEvent("sentFriendRequest")
     }
 }

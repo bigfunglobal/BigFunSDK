@@ -47,4 +47,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.8'
     implementation 'com.google.code.gson:gson:2.7'
     implementation 'com.just.agentweb:agentweb:4.1.4'
+    api group: 'com.zendesk', name: 'messaging', version: '4.3.1'
+    api group: 'com.zendesk', name: 'chat', version: '2.2.0'
+    implementation group: 'com.zendesk', name: 'chat-providers', version: '2.2.0'
 }

@@ -11,5 +11,9 @@
             android:name="com.bigfun.tm.PayActivity"
             android:screenOrientation="portrait"
             android:theme="@style/BaseAppTheme" />
+
+        <activity
+            android:name="zendesk.messaging.MessagingActivity"
+            android:theme="@style/MessagingStyle" />
     </application>
 </manifest>
