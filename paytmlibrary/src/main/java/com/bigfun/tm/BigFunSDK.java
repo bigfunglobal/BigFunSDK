@@ -13,8 +13,10 @@ import android.text.TextUtils;
 import android.widget.Toast;
 
 import com.bigfun.tm.encrypt.DesUtils;
-import com.bigfun.tm.encrypt.MD5Utils;
 import com.bigfun.tm.login.Callback;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -371,7 +373,29 @@ public class BigFunSDK {
     @Keep
     public boolean getPayResult(int requestCode, Intent data) {
         if (requestCode == 100 && data != null) {
-            return data.getStringExtra("nativeSdkForMerchantMessage").isEmpty();
+            String response = data.getStringExtra("response");
+            if (TextUtils.isEmpty(response)) {
+                LogUtils.log(data.getStringExtra("nativeSdkForMerchantMessage"));
+                return false;
+            } else {
+                try {
+                    JSONObject jsonObject = new JSONObject(response);
+                    String responseCode = jsonObject.optString("RESPCODE");
+                    if (TextUtils.isEmpty(responseCode)) {
+                        LogUtils.log("pay unknow error");
+                    } else {
+                        if ("01".equals(responseCode)) {
+                            LogUtils.log("01--" + jsonObject.optString("STATUS"));
+                            return true;
+                        }
+                        LogUtils.log(responseCode + jsonObject.optString("STATUS"));
+                    }
+                    return false;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                    LogUtils.log(e.getMessage());
+                }
+            }
         }
         return false;
     }

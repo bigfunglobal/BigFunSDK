@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
+import android.text.TextUtils;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
@@ -82,5 +83,59 @@ public class Utils {
             name = "1.0.0";
         }
         return name;
+    }
+
+    /**
+     * 判断是否安装应用
+     *
+     * @param context
+     * @param appPackageName
+     * @return
+     */
+    public static boolean isInstall(Context context, String appPackageName) {
+        PackageManager packageManager = context.getPackageManager();// 获取packagemanager
+        List<PackageInfo> info = packageManager.getInstalledPackages(0);// 获取所有已安装程序的包信息
+        if (info != null) {
+            for (int i = 0; i < info.size(); i++) {
+                String pn = info.get(i).packageName;
+                if (appPackageName.equals(pn)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    /**
+     * 获取某个应用的版本名
+     *
+     * @return
+     */
+    public static String getVersion(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        List<PackageInfo> packageInfos = packageManager.getInstalledPackages(0);
+        for (PackageInfo info : packageInfos) {
+            if (info.packageName.equals("net.one97.paytm")) {
+                return info.versionName;
+            }
+        }
+        return "";
+    }
+
+    public static int versionCompare(String str1, String str2) {
+        if (TextUtils.isEmpty(str1) || TextUtils.isEmpty(str2)) {
+            return 1;
+        }
+        String[] vals1 = str1.split("\\.");
+        String[] vals2 = str2.split("\\.");
+        int i = 0;
+        while (i < vals1.length && i < vals2.length && vals1[i].equalsIgnoreCase(vals2[i])) {
+            i++;
+        }
+        if (i < vals1.length && i < vals2.length) {
+            int diff = Integer.valueOf(vals1[i]).compareTo(Integer.valueOf(vals2[i]));
+            return Integer.signum(diff);
+        }
+        return Integer.signum(vals1.length - vals2.length);
     }
 }

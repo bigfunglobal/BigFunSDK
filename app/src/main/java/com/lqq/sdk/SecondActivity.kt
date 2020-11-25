@@ -15,8 +15,6 @@ import kotlinx.android.synthetic.main.activity_second.*
 
 
 private const val TAG = "SecondActivity"
-const val TOKEN =
-    "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJyb2xlIjoiYXBpdXNlciIsImFjY291bnQiOiI0Mjc1MiIsImlzcyI6ImpveWNoZWFwIiwiYXVkIjoiMDk4ZjZiY2Q0NjIxZDM3M2NhZGU0ZTgzMjYyN2I0ZjYiLCJleHBpcmVkVGltZSI6MTYwMDk0NjQyMDgzMywiZXhwIjoxNjAwOTQ2NDIwLCJuYmYiOjE1OTkyMTg0MjB9.pGnxoGkghbZBhKxqx029ftIj9RyUehsmvonbm9W7RZ8"
 
 class SecondActivity : AppCompatActivity() {
 
@@ -114,7 +112,7 @@ class SecondActivity : AppCompatActivity() {
 
         btn_order2.setOnClickListener {
             BigFunSDK.getInstance().payOrder(
-                mutableMapOf<String, Any>("orderId" to "2e23856b0aee4d619a347d295e51d92e"),
+                mutableMapOf<String, Any>("orderId" to "202011251913047466684988"),
                 this,
                 object : ResponseListener {
                     override fun onSuccess() {
@@ -146,19 +144,11 @@ class SecondActivity : AppCompatActivity() {
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
+        Log.d(TAG, "onActivityResult: ${BigFunSDK.getInstance().getPayResult(requestCode, data)}")
         if (requestCode == 100 && data != null) {
-            Toast.makeText(
-                applicationContext,
-                "onActivityResult: ${data.getStringExtra("response")}--${data.getStringExtra("nativeSdkForMerchantMessage")}",
-                Toast.LENGTH_SHORT
-            ).show()
             Log.d(
                 TAG,
                 "onActivityResult: ${data.getStringExtra("response")}--${data.getStringExtra("nativeSdkForMerchantMessage")}"
-            )
-            Log.d(
-                TAG,
-                "onActivityResult: ${data.getStringExtra("nativeSdkForMerchantMessage") == null}"
             )
         }
     }

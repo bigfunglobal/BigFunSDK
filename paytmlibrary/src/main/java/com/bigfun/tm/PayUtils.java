@@ -1,21 +1,18 @@
 package com.bigfun.tm;
 
 import android.app.Activity;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.util.Log;
 
 import com.bigfun.tm.model.PaymentOrderBean;
-import com.paytm.pgsdk.PaytmOrder;
-import com.paytm.pgsdk.PaytmPaymentTransactionCallback;
-import com.paytm.pgsdk.TransactionManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class PayUtils {
-    private static final String TAG = "PayUtils2";
+    private static final String TAG = "PayUtils";
 
     private PayUtils() {
     }
@@ -72,51 +69,39 @@ public class PayUtils {
             String[] split = s.split("=");
             map.put(split[0], split[1]);
         }
-        PaytmOrder paytmOrder = new PaytmOrder(
-                map.get("orderId"),
-                map.get("mid"),
-                map.get("txnToken"),
-                String.valueOf(bean.getOutPayAmount()),
-                "https://securegw.paytm.in/theia/paytmCallback?ORDER_ID=" + map.get("orderId")
-        );
-        TransactionManager transactionManager =
-                new TransactionManager(paytmOrder, new PaytmPaymentTransactionCallback() {
-                    @Override
-                    public void onTransactionResponse(Bundle bundle) {
-                        Log.d(TAG, "onTransactionResponse: ");
-                    }
-
-                    @Override
-                    public void networkNotAvailable() {
-                        Log.d(TAG, "networkNotAvailable: ");
-                    }
-
-                    @Override
-                    public void clientAuthenticationFailed(String s) {
-                        Log.d(TAG, "clientAuthenticationFailed: ");
-                    }
-
-                    @Override
-                    public void someUIErrorOccurred(String s) {
-                        Log.d(TAG, "someUIErrorOccurred: ");
-                    }
-
-                    @Override
-                    public void onErrorLoadingWebPage(int i, String s, String s1) {
-                        Log.d(TAG, "onErrorLoadingWebPage: ");
-                    }
-
-                    @Override
-                    public void onBackPressedCancelTransaction() {
-                        Log.d(TAG, "onBackPressedCancelTransaction: ");
-                    }
-
-                    @Override
-                    public void onTransactionCancel(String s, Bundle bundle) {
-                        Log.d(TAG, "onTransactionCancel: ");
-                    }
-                });
-        transactionManager.setShowPaymentUrl("https://securegw.paytm.in/theia/api/v1/showPaymentPage");
-        transactionManager.startTransaction(activity, requestCode);
+        if (Utils.isInstall(BigFunSDK.mContext, "net.one97.paytm")) {
+            //安装Paytm
+            String version = Utils.getVersion(BigFunSDK.mContext);
+            if (Utils.versionCompare(version, "8.6.0") < 0) {
+                Intent paytmIntent = new Intent();
+                Bundle bundle = new Bundle();
+                bundle.putDouble("nativeSdkForMerchantAmount", bean.getOutPayAmount());
+                bundle.putString("orderid", map.get("orderId"));
+                bundle.putString("txnToken", map.get("txnToken"));
+                bundle.putString("mid", map.get("mid"));
+                paytmIntent.setComponent(new ComponentName("net.one97.paytm", "net.one97.paytm.AJRJarvisSplash"));
+                paytmIntent.putExtra("paymentmode", 2); // You must have to pass hard coded 2 here, Else your transaction would not proceed.
+                paytmIntent.putExtra("bill", bundle);
+                activity.startActivityForResult(paytmIntent, requestCode);
+            } else {
+                //未安装Paytm
+                Intent paytmIntent = new Intent();
+                paytmIntent.setComponent(new ComponentName("net.one97.paytm", "net.one97.paytm.AJRRechargePaymentActivity"));
+                paytmIntent.putExtra("paymentmode", 2);
+                paytmIntent.putExtra("enable_paytm_invoke", true);
+                paytmIntent.putExtra("paytm_invoke", true);
+                paytmIntent.putExtra("price", String.valueOf(bean.getOutPayAmount())); //this is string amount
+                paytmIntent.putExtra("nativeSdkEnabled", true);
+                paytmIntent.putExtra("orderid", map.get("orderId"));
+                paytmIntent.putExtra("txnToken", map.get("txnToken"));
+                paytmIntent.putExtra("mid", map.get("mid"));
+                activity.startActivityForResult(paytmIntent, requestCode);
+            }
+        } else {
+            //未安装Paytm
+            Intent intent = new Intent(activity, PayActivity.class);
+            intent.putExtra(Constant.EXTRA_KEY_PAY_URL, bean.getJumpUrl());
+            activity.startActivity(intent);
+        }
     }
 }
