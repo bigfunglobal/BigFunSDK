@@ -12,7 +12,6 @@ import android.support.annotation.Keep;
 import android.text.TextUtils;
 
 import com.bigfun.tm.encrypt.DesUtils;
-import com.bigfun.tm.login.Callback;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -25,7 +24,6 @@ import static com.bigfun.tm.Constant.PAY_TAG;
 @Keep
 public class BigFunSDK {
 
-    public String mPhone = "";
     public static Context mContext;
     private static String mChannel;
     private static BigFunSDK instance;
