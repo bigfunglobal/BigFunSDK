@@ -27,24 +27,7 @@ class SecondActivity : AppCompatActivity() {
         setContentView(R.layout.activity_second)
 
         btn_order.setOnClickListener {
-            BigFunSDK.getInstance().rechargeOrder(
-                mapOf(
-                    "outUserId" to "0",
-                    "outOrderNo" to "774",
-                    "commodityId" to "10RUPEE",
-                    "mobile" to "7402603943",
-                    "email" to "3859034@qq.com"
-                ),
-                this, object : ResponseListener {
-                    override fun onFail(msg: String) {
-                        Log.d(TAG, "onFail: $msg")
-                    }
 
-                    override fun onSuccess() {
-                        Log.d(TAG, "onResult: ")
-                    }
-                }
-            )
         }
 
         btn_builder.setOnClickListener {
@@ -53,72 +36,28 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_login.setOnClickListener {
-            val map = mutableMapOf<String, Any>(
-                "gameUserId" to 1
-            )
-            BigFunSDK.getInstance().guestLogin(map,
-                object : ResponseListener {
-                    override fun onSuccess() {
-                        Log.d(TAG, "onSuccess: ")
-                    }
 
-                    override fun onFail(msg: String?) {
-                        Log.d(TAG, "onFail: $msg")
-                    }
-                })
         }
 
         btn_phone_login.setOnClickListener {
-            BigFunSDK.getInstance().loginWithCode(mutableMapOf<String, Any>(
-                "mobile" to et_phone.text.toString(),
-                "code" to et_code.text.toString()
-            ),
-                object : ResponseListener {
-                    override fun onSuccess() {
-                        Log.d(TAG, "onSuccess: ")
-                    }
 
-                    override fun onFail(msg: String?) {
-                        Log.d(TAG, "onFail: $msg")
-                    }
-                })
         }
 
         btn_channel_config.setOnClickListener {
-            BigFunSDK.getInstance().getChannelConfig(
-                object : Callback<String> {
-                    override fun onResult(result: String) {
-                        Log.d(TAG, "onResult: $result")
-                    }
 
-                    override fun onFail(msg: String) {
-                        Log.d(TAG, "onFail: $msg")
-                    }
-                })
         }
 
         btn_send_sms.setOnClickListener {
-            BigFunSDK.getInstance().sendSms(mutableMapOf<String, Any>(
-                "mobile" to et_phone.text.toString(),
-            ),
-                object : ResponseListener {
-                    override fun onSuccess() {
-                        Log.d(TAG, "onSuccess: ")
-                    }
 
-                    override fun onFail(msg: String?) {
-                        Log.d(TAG, "onFail: $msg")
-                    }
-                })
         }
 
         btn_is_login.setOnClickListener {
-            Log.d(TAG, "onCreate: ${BigFunSDK.getInstance().isLogin}")
+
         }
 
         btn_pay_order.setOnClickListener {
             BigFunSDK.getInstance().payOrder(mutableMapOf<String, Any>(
-                "orderId" to "03ebf0ae77c64e02b877bd5e9c9a0c65"
+                "orderId" to "202011251928053535876977"
             ), this, object : ResponseListener {
                 override fun onSuccess() {
                     runOnUiThread {
@@ -139,17 +78,7 @@ class SecondActivity : AppCompatActivity() {
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        callbackManager.onActivityResult(requestCode, resultCode, data)
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == 100 && data != null) {
-            Log.d(
-                "pay",
-                "onActivityResult: ${data.getStringExtra("response")}--${data.getStringExtra("nativeSdkForMerchantMessage")}"
-            )
-            Log.d(
-                TAG,
-                "onActivityResult: ${data.getStringExtra("nativeSdkForMerchantMessage") == null}"
-            )
-        }
+        Log.d(TAG, "onActivityResult: ${BigFunSDK.getInstance().getPayResult(requestCode, data)}")
     }
 }
