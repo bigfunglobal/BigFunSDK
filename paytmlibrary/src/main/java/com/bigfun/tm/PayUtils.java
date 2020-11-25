@@ -106,6 +106,7 @@ public class PayUtils {
             }
         } catch (Exception e) {
             LogUtils.log(e.getMessage());
+            e.printStackTrace();
         }
     }
 }
