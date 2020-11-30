@@ -20,13 +20,22 @@ public class Utils {
     public static String getIp(Context context) {
         String ip = "";
         ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
-        NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
-        if (mobile.isConnected()) {
-            getLocalIp();
-        } else if (wifi.isConnected()) {
-            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
-            getWifiIp(wm.getConnectionInfo().getIpAddress());
+        if (cm != null) {
+            NetworkInfo activeNetworkInfo = cm.getActiveNetworkInfo();
+            if (activeNetworkInfo != null) {
+                if (activeNetworkInfo.isAvailable()) {
+                    NetworkInfo mobile = cm.getNetworkInfo(ConnectivityManager.TYPE_MOBILE);
+                    NetworkInfo wifi = cm.getNetworkInfo(ConnectivityManager.TYPE_WIFI);
+                    if (mobile != null && wifi != null) {
+                        if (mobile.isConnected()) {
+                            ip = getLocalIp();
+                        } else if (wifi.isConnected()) {
+                            WifiManager wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+                            ip = getWifiIp(wm.getConnectionInfo().getIpAddress());
+                        }
+                    }
+                }
+            }
         }
         return ip;
     }
