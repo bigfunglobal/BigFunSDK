@@ -5,16 +5,10 @@
     android:orientation="vertical">
 
     <EditText
-        android:id="@+id/et_phone"
+        android:id="@+id/et_order"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="请输入手机号" />
-
-    <EditText
-        android:id="@+id/et_code"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:hint="请输入验证码" />
+        android:hint="请输入订单号" />
 
     <Button
         android:id="@+id/btn_order"
@@ -22,50 +16,8 @@
         android:layout_height="wrap_content"
         android:text="充值下单" />
 
-    <Button
-        android:id="@+id/btn_builder"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Builder模式" />
-
-    <Button
-        android:id="@+id/btn_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="游客登录" />
-
-    <Button
-        android:id="@+id/btn_phone_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="手机号登录" />
-
-    <Button
-        android:id="@+id/btn_channel_config"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="获取渠道配置" />
-
-    <Button
-        android:id="@+id/btn_send_sms"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="发送短信" />
-
-    <Button
-        android:id="@+id/btn_is_login"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="是否登录" />
-
     <TextView
         android:id="@+id/tv"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <Button
-        android:id="@+id/btn_pay_order"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="预充值下单" />
 </LinearLayout>
