@@ -3,6 +3,7 @@ package com.lqq.sdk
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.util.ArrayMap
 import android.util.Log
 import android.widget.Toast
 import com.bigfun.tm.BigFunSDK
@@ -138,7 +139,14 @@ class SecondActivity : AppCompatActivity() {
         }
 
         btn_chat.setOnClickListener {
-            BigFunChat.getInstance().chat()
+            val params = ArrayMap<String, String>()
+            params["name"] = "Test"
+            params["email"] = "test@gmail.com"
+            params["phone"] = "7400000000"
+//            params["gameUserId"] = "110110110"
+            params["appId"] = "120120120120"
+            params["appName"] = "Test Rummy"
+            BigFunChat.getInstance().chat(this, params)
         }
     }
 
