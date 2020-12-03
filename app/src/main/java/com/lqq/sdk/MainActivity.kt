@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
 
         btn_order.setOnClickListener {
             BigFunSDK.getInstance().payOrder(mutableMapOf<String, Any>(
-                "orderId" to "202011251943212051965178"
+                "orderId" to "202012031733538221041687"
             ), this, object : ResponseListener {
                 override fun onSuccess() {
                     runOnUiThread {

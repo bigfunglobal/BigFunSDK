@@ -16,7 +16,7 @@ class App : Application() {
         BigFunSDK.setDebug(true)
         BigFunSDK.getInstance().init(
             applicationContext,
-            "CYNOPS_Paytm_Test"
+            "test_fb"
         )
     }
 }
