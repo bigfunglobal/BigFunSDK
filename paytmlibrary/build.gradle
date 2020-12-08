@@ -43,4 +43,7 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:3.12.8'
     implementation 'com.google.code.gson:gson:2.7'
     implementation 'com.just.agentweb:agentweb:4.1.4'
+    api('com.paytm.appinvokesdk:appinvokesdk:1.0') {
+        exclude group: 'com.squareup.okhttp3', module: 'okhttp'
+    }
 }
