@@ -11,6 +11,7 @@ import com.bigfun.tm.ResponseListener
 import com.facebook.CallbackManager
 import com.facebook.FacebookException
 import com.facebook.appevents.AppEventsLogger
+import com.facebook.applinks.AppLinkData
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
 import kotlinx.android.synthetic.main.activity_main.*
@@ -30,6 +31,16 @@ class MainActivity : AppCompatActivity() {
         cm = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         setContentView(R.layout.activity_main)
         initListener()
+        initDeep()
+    }
+
+    private fun initDeep() {
+        AppLinkData.fetchDeferredAppLinkData(this) {
+            Log.d(
+                TAG,
+                "initDeep: ${it.promotionCode}--${it.ref}--${it.refererData}--${it.targetUri}"
+            )
+        }
     }
 
     /**

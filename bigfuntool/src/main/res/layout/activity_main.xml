@@ -30,7 +30,7 @@
                     android:layout_height="wrap_content"
                     android:text="手机号:"
                     android:textColor="#000"
-                    android:textSize="@dimen/dimen_16sp" />
+                    android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/et_phone"
@@ -56,7 +56,7 @@
                     android:layout_height="wrap_content"
                     android:text="gameUserId:"
                     android:textColor="#000"
-                    android:textSize="@dimen/dimen_16sp" />
+                    android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/et_game_user_id"
@@ -82,7 +82,7 @@
                     android:layout_height="wrap_content"
                     android:text="channel:"
                     android:textColor="#000"
-                    android:textSize="@dimen/dimen_16sp" />
+                    android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/et_channel"
@@ -108,7 +108,7 @@
                     android:layout_height="wrap_content"
                     android:text="key:"
                     android:textColor="#000"
-                    android:textSize="@dimen/dimen_16sp" />
+                    android:textSize="16sp" />
 
                 <EditText
                     android:id="@+id/et_key"
