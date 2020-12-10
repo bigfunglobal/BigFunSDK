@@ -6,8 +6,6 @@ import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
 import android.widget.Toast
-import com.bigfun.tm.BigFunSDK
-import com.bigfun.tm.ResponseListener
 import com.facebook.CallbackManager
 import com.facebook.FacebookException
 import com.facebook.appevents.AppEventsLogger
@@ -38,7 +36,14 @@ class MainActivity : AppCompatActivity() {
         AppLinkData.fetchDeferredAppLinkData(this) {
             Log.d(
                 TAG,
-                "initDeep: ${it.promotionCode}--${it.ref}--${it.refererData}--${it.targetUri}"
+                "initDeep: ${it?.promotionCode}--${it?.ref}--${it?.refererData}--${it?.targetUri}"
+            )
+        }
+
+        AppLinkData.fetchDeferredAppLinkData(this) {
+            Log.d(
+                TAG,
+                "initDeep: ${it?.promotionCode}--${it?.ref}--${it?.refererData}--${it?.targetUri}"
             )
         }
     }
@@ -83,7 +88,6 @@ class MainActivity : AppCompatActivity() {
             Toast.makeText(applicationContext, "请输入渠道号或者Key", Toast.LENGTH_SHORT).show()
             return
         }
-        BigFunSDK.getInstance().init(applicationContext, channel)
         tv_result.text = "sdk初始化成功"
     }
 
@@ -122,19 +126,19 @@ class MainActivity : AppCompatActivity() {
                         return
                     }
                     map["gameUserId"] = gameUserId
-                    BigFunSDK.getInstance().fbLogin(map, object : ResponseListener {
-                        override fun onSuccess() {
-                            runOnUiThread {
-                                tv_result.text = "fb登录成功"
-                            }
-                        }
-
-                        override fun onFail(msg: String?) {
-                            runOnUiThread {
-                                tv_result.text = "fb登录失败-$msg"
-                            }
-                        }
-                    })
+//                    BigFunSDK.getInstance().fbLogin(map, object : ResponseListener {
+//                        override fun onSuccess() {
+//                            runOnUiThread {
+//                                tv_result.text = "fb登录成功"
+//                            }
+//                        }
+//
+//                        override fun onFail(msg: String?) {
+//                            runOnUiThread {
+//                                tv_result.text = "fb登录失败-$msg"
+//                            }
+//                        }
+//                    })
                 }
             }
         })
@@ -169,19 +173,19 @@ class MainActivity : AppCompatActivity() {
             "gameUserId" to gameUserId,
             "mobile" to phone
         )
-        BigFunSDK.getInstance().phoneLogin(map, object : ResponseListener {
-            override fun onSuccess() {
-                runOnUiThread {
-                    tv_result.text = "手机号登录成功"
-                }
-            }
-
-            override fun onFail(msg: String?) {
-                runOnUiThread {
-                    tv_result.text = "手机号登录失败-$msg"
-                }
-            }
-        })
+//        BigFunSDK.getInstance().phoneLogin(map, object : ResponseListener {
+//            override fun onSuccess() {
+//                runOnUiThread {
+//                    tv_result.text = "手机号登录成功"
+//                }
+//            }
+//
+//            override fun onFail(msg: String?) {
+//                runOnUiThread {
+//                    tv_result.text = "手机号登录失败-$msg"
+//                }
+//            }
+//        })
     }
 
     /**
@@ -196,19 +200,19 @@ class MainActivity : AppCompatActivity() {
         val map = mutableMapOf<String, Any?>(
             "gameUserId" to gameUserId
         )
-        BigFunSDK.getInstance().guestLogin(map, object : ResponseListener {
-            override fun onSuccess() {
-                runOnUiThread {
-                    tv_result.text = "游客登录成功"
-                }
-            }
-
-            override fun onFail(msg: String?) {
-                runOnUiThread {
-                    tv_result.text = "游客登录失败--$msg"
-                }
-            }
-        })
+//        BigFunSDK.getInstance().guestLogin(map, object : ResponseListener {
+//            override fun onSuccess() {
+//                runOnUiThread {
+//                    tv_result.text = "游客登录成功"
+//                }
+//            }
+//
+//            override fun onFail(msg: String?) {
+//                runOnUiThread {
+//                    tv_result.text = "游客登录失败--$msg"
+//                }
+//            }
+//        })
     }
 
     /**
@@ -287,19 +291,19 @@ class MainActivity : AppCompatActivity() {
                         return
                     }
                     map["gameUserId"] = gameUserId
-                    BigFunSDK.getInstance().googleLogin(map, object : ResponseListener {
-                        override fun onSuccess() {
-                            runOnUiThread {
-                                tv_result.text = "google登录成功"
-                            }
-                        }
-
-                        override fun onFail(msg: String?) {
-                            runOnUiThread {
-                                tv_result.text = "google登录失败--$msg"
-                            }
-                        }
-                    })
+//                    BigFunSDK.getInstance().googleLogin(map, object : ResponseListener {
+//                        override fun onSuccess() {
+//                            runOnUiThread {
+//                                tv_result.text = "google登录成功"
+//                            }
+//                        }
+//
+//                        override fun onFail(msg: String?) {
+//                            runOnUiThread {
+//                                tv_result.text = "google登录失败--$msg"
+//                            }
+//                        }
+//                    })
                 } catch (e: ApiException) {
                     Log.d(TAG, "onActivityResult: error" + e.message)
                     e.printStackTrace()
