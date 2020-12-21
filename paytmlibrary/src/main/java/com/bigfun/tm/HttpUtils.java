@@ -1,6 +1,7 @@
 package com.bigfun.tm;
 
 import android.app.Activity;
+import android.os.SystemClock;
 import android.text.TextUtils;
 
 import com.bigfun.tm.encrypt.EncryptUtil;
@@ -11,6 +12,8 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -45,6 +48,13 @@ public class HttpUtils {
             .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
             .readTimeout(TIME_OUT, TimeUnit.SECONDS)
             .build();
+    /**
+     * 最大请求次数
+     */
+    private static final int MAX_TIMES = 3;
+    private int mRequestTimes = 0;
+    private ExecutorService mExecutors = Executors.newFixedThreadPool(2);
+    public static final int REQUEST_CODE = 100;
 
     /**
      * post请求
@@ -265,173 +275,102 @@ public class HttpUtils {
     }
 
     /**
-     * 充值下单
-     */
-    public void paymentOrder(String url, Map<String, Object> params, Activity activity, int requestCode, ResponseListener listener) {
-        if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
-        if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
-        String json = null;
-        try {
-            json = EncryptUtil.encryptData(gson.toJson(params));
-            Request request = new Request.Builder()
-                    .url(url)
-                    .addHeader(
-                            "accessToken",
-                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, ""))
-                    .post(RequestBody.create(mediaType, json))
-                    .build();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    listener.onFail(e.getMessage());
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        if (response.body() != null) {
-                            if (response.code() == 200) {
-                                PaymentOrderBean bean =
-                                        gson.fromJson(
-                                                response.body().string(),
-                                                PaymentOrderBean.class
-                                        );
-                                if (Integer.parseInt(bean.getCode()) == 0) {
-                                    if (bean.getData() != null) {
-                                        listener.onSuccess();
-                                        PayUtils.getInstance().pay(
-                                                bean.getData(),
-                                                activity,
-                                                requestCode
-                                        );
-                                    } else {
-                                        listener.onFail(bean.getMsg());
-                                    }
-                                } else {
-                                    listener.onFail(bean.getMsg());
-                                }
-                            } else {
-                                listener.onFail(response.message());
-                            }
-                        } else {
-                            listener.onFail(response.message());
-                        }
-                    } else {
-                        listener.onFail(response.message());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            listener.onFail(e.getMessage());
-        }
-    }
-
-    /**
-     * 获取渠道配置
-     */
-    public <T> void getChannelConfig(String url, Map<String, Object> params, com.bigfun.tm.login.Callback<T> callback) {
-        if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
-        if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
-        String json = null;
-        try {
-            json = EncryptUtil.encryptData(gson.toJson(params));
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(mediaType, json))
-                    .build();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    callback.onFail(e.getMessage());
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        if (response.code() == 200) {
-                            if (response.body() != null) {
-                                callback.onResult((T) response.body().string());
-                            } else {
-                                callback.onFail(response.message());
-                            }
-                        } else {
-                            callback.onFail(response.message());
-                        }
-                    } else {
-                        callback.onFail(response.message());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            callback.onFail(e.getMessage());
-        }
-    }
-
-    /**
      * 预充值下单
      *
      * @param url
      * @param params
      * @param activity
-     * @param requestCode
      * @param listener
      */
-    public void payOrder(String url, Map<String, Object> params, Activity activity, int requestCode, ResponseListener listener) {
+    public void payOrder(String url, Map<String, Object> params, Activity activity, ResponseListener listener) {
+        if (NetworkUtils.getNetworkState(BigFunSDK.mContext) == 0) {
+            return;
+        }
         if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
         if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
-        String json = null;
-        try {
-            json = EncryptUtil.encryptData(gson.toJson(params));
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(mediaType, json))
-                    .build();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    listener.onFail(e.getMessage());
-                }
+        mExecutors.execute(new Task(listener, params, activity, url));
+    }
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    if (response.isSuccessful()) {
-                        if (response.body() != null) {
-                            if (response.code() == 200) {
-                                PaymentOrderBean bean =
-                                        gson.fromJson(
-                                                response.body().string(),
-                                                PaymentOrderBean.class
-                                        );
-                                if (Integer.parseInt(bean.getCode()) == 0) {
-                                    if (bean.getData() != null) {
-                                        listener.onSuccess();
-                                        PayUtils.getInstance().pay(
-                                                bean.getData(),
-                                                activity,
-                                                requestCode
-                                        );
+    public class Task implements Runnable {
+
+        /**
+         * 最大请求次数
+         */
+        private static final int MAX_TIMES = 3;
+        private int mRequestTimes = 0;
+        private ResponseListener listener;
+        private Map<String, Object> params;
+        private Activity activity;
+
+        public Task(ResponseListener listener, Map<String, Object> params, Activity activity, String url) {
+            this.listener = listener;
+            this.params = params;
+            this.activity = activity;
+            this.url = url;
+        }
+
+        private String url;
+
+        @Override
+        public void run() {
+            String json = null;
+            mRequestTimes = 0;
+            while (mRequestTimes < MAX_TIMES) {
+                mRequestTimes++;
+                try {
+                    json = EncryptUtil.encryptData(gson.toJson(params));
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .post(RequestBody.create(mediaType, json))
+                            .build();
+                    okHttpClient.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            listener.onFail(e.getMessage());
+                        }
+
+                        @Override
+                        public void onResponse(Call call, Response response) throws IOException {
+                            if (response.isSuccessful()) {
+                                if (response.body() != null) {
+                                    if (response.code() == 200) {
+                                        PaymentOrderBean bean =
+                                                gson.fromJson(
+                                                        response.body().string(),
+                                                        PaymentOrderBean.class
+                                                );
+                                        if (Integer.parseInt(bean.getCode()) == 0) {
+                                            if (bean.getData() != null) {
+                                                listener.onSuccess();
+                                                PayUtils.getInstance().pay(
+                                                        bean.getData(),
+                                                        activity,
+                                                        REQUEST_CODE
+                                                );
+                                            } else {
+                                                listener.onFail(bean.getMsg());
+                                            }
+                                        } else {
+                                            listener.onFail(bean.getMsg());
+                                        }
                                     } else {
-                                        listener.onFail(bean.getMsg());
+                                        listener.onFail(response.message());
                                     }
                                 } else {
-                                    listener.onFail(bean.getMsg());
+                                    listener.onFail(response.message());
                                 }
                             } else {
                                 listener.onFail(response.message());
                             }
-                        } else {
-                            listener.onFail(response.message());
                         }
-                    } else {
-                        listener.onFail(response.message());
-                    }
+                    });
+                    break;
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    listener.onFail(e.getMessage());
+                    SystemClock.sleep(500);
                 }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            listener.onFail(e.getMessage());
+            }
         }
     }
 }

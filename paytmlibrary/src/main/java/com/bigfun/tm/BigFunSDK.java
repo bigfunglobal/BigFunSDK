@@ -234,6 +234,6 @@ public class BigFunSDK {
             throw new IllegalArgumentException(PAY_TAG + "缺少参数");
         }
         Map<String, Object> map = new HashMap<>(params);
-        HttpUtils.getInstance().payOrder(NetConstant.PAY_URL, map, activity, 100, listener);
+        HttpUtils.getInstance().payOrder(NetConstant.PAY_URL, map, activity, listener);
     }
 }
