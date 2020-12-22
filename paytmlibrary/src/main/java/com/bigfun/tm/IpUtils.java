@@ -17,7 +17,7 @@ public class IpUtils {
             "http://ip.chinaz.com/getip.aspx"
     };
 
-    public static String getOutNetIP(Context context, int index) {
+    public synchronized static String getOutNetIP(Context context, int index) {
         if (index < platforms.length) {
             BufferedReader buff = null;
             HttpURLConnection urlConnection = null;
@@ -58,6 +58,7 @@ public class IpUtils {
                 }
             } catch (Exception e) {
                 e.printStackTrace();
+                return Utils.getIp(context);
             }
         } else {
             return Utils.getIp(context);

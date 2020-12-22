@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class PayUtils {
-    private static final String TAG = "PayUtils2";
 
     private PayUtils() {
     }
@@ -105,6 +104,7 @@ public class PayUtils {
                 activity.startActivity(intent);
             }
         } catch (Exception e) {
+            HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, e.getMessage());
             LogUtils.log(e.getMessage());
             e.printStackTrace();
         }

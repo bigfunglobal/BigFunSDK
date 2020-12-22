@@ -1,9 +1,13 @@
 package com.bigfun.tm;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
 
+import com.bigfun.tm.database.EventBean;
+import com.bigfun.tm.database.EventManager;
 import com.bigfun.tm.encrypt.EncryptUtil;
 import com.bigfun.tm.model.LoginBean;
 import com.bigfun.tm.model.PaymentOrderBean;
@@ -11,6 +15,7 @@ import com.bigfun.tm.model.SendSmsBean;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -37,24 +42,22 @@ public class HttpUtils {
         return InstanceHolder.instance;
     }
 
-    private MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
-    private String token = (String) SPUtils.getInstance().get(BigFunSDK.mContext, "accessToken", "");
-    private static final long TIME_OUT = 10L;
+    public MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
+    private static final long TIME_OUT = 30L;
     public static String mCode = "";
     public static String mPhone = "";
-    private Gson gson = new Gson();
-    private OkHttpClient okHttpClient = new OkHttpClient.Builder()
+    public Gson gson = new Gson();
+    public OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
             .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
             .readTimeout(TIME_OUT, TimeUnit.SECONDS)
             .build();
-    /**
-     * 最大请求次数
-     */
-    private static final int MAX_TIMES = 3;
-    private int mRequestTimes = 0;
     private ExecutorService mExecutors = Executors.newFixedThreadPool(2);
     public static final int REQUEST_CODE = 100;
+    public static final String ORDER_FAIL = "ORDER_FAIL";
+    public static final String ORDER_EXCEPTION = "ORDER_EXCEPTION";
+    public static final String PAY_FAIL = "PAY_FAIL";
+    public static Handler mHandler = new Handler(Looper.getMainLooper());
 
     /**
      * post请求
@@ -176,105 +179,6 @@ public class HttpUtils {
     }
 
     /**
-     * 发送验证码
-     */
-    public void sendSms(String url, Map<String, Object> params, ResponseListener listener) {
-        if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
-        if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
-        mPhone = params.get("mobile").toString();
-        String json = null;
-        try {
-            json = EncryptUtil.encryptData(gson.toJson(params));
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(mediaType, json))
-                    .build();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    listener.onFail(e.getMessage());
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-                    try {
-                        if (response.isSuccessful()) {
-                            if (response.code() == 200) {
-                                if (response.body() != null) {
-                                    SendSmsBean bean =
-                                            gson.fromJson(
-                                                    response.body().string(),
-                                                    SendSmsBean.class
-                                            );
-                                    if (Integer.parseInt(bean.getCode()) == 0) {
-                                        mCode = bean.getData();
-                                        listener.onSuccess();
-                                    } else {
-                                        listener.onFail(bean.getMsg());
-                                    }
-                                } else {
-                                    listener.onFail(response.message());
-                                }
-                            } else {
-                                listener.onFail(response.message());
-                            }
-                        } else {
-                            listener.onFail(response.code() + "--" + response.message());
-                        }
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        listener.onFail(e.getMessage());
-                    }
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            listener.onFail(e.getMessage());
-        }
-    }
-
-    /**
-     * get请求
-     *
-     * @param url      请求地址
-     * @param params   请求参数
-     * @param listener 请求回调
-     */
-    public <T> void get(String url, Map<String, Object> params, ResponseListener listener) {
-        try {
-            if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
-            StringBuffer requestUrl = new StringBuffer(url);
-            boolean isFirst = true;
-            for (String key : params.keySet()) {
-                if (isFirst) {
-                    isFirst = false;
-                    requestUrl.append("?");
-                } else {
-                    requestUrl.append("&");
-                }
-                requestUrl.append(key).append(params.get(key));
-            }
-            Request request = new Request.Builder()
-                    .url(requestUrl.toString())
-                    .get()
-                    .build();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    listener.onFail(e.getMessage());
-                }
-
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
-
-                }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
      * 预充值下单
      *
      * @param url
@@ -326,6 +230,7 @@ public class HttpUtils {
                     okHttpClient.newCall(request).enqueue(new Callback() {
                         @Override
                         public void onFailure(Call call, IOException e) {
+                            report(ORDER_FAIL, e.getMessage());
                             listener.onFail(e.getMessage());
                         }
 
@@ -348,29 +253,43 @@ public class HttpUtils {
                                                         REQUEST_CODE
                                                 );
                                             } else {
+                                                report(ORDER_FAIL, bean.getMsg());
                                                 listener.onFail(bean.getMsg());
                                             }
                                         } else {
+                                            report(ORDER_FAIL, bean.getMsg());
                                             listener.onFail(bean.getMsg());
                                         }
                                     } else {
+                                        report(ORDER_FAIL, response.message());
                                         listener.onFail(response.message());
                                     }
                                 } else {
+                                    report(ORDER_FAIL, response.message());
                                     listener.onFail(response.message());
                                 }
                             } else {
+                                report(ORDER_FAIL, response.message());
                                 listener.onFail(response.message());
                             }
                         }
                     });
                     break;
                 } catch (Exception e) {
+                    report(ORDER_EXCEPTION, e.getMessage());
                     e.printStackTrace();
                     listener.onFail(e.getMessage());
                     SystemClock.sleep(500);
                 }
             }
         }
+    }
+
+    public synchronized void report(String action, String content) {
+        mHandler.post(() -> EventManager.getInstance().addEvent(action, content));
+    }
+
+    public synchronized void upload(List<EventBean> list) {
+        mExecutors.execute(new ReportTask(list));
     }
 }

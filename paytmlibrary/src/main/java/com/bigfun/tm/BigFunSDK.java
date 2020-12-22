@@ -25,7 +25,7 @@ import static com.bigfun.tm.Constant.PAY_TAG;
 public class BigFunSDK {
 
     public static Context mContext;
-    private static String mChannel;
+    public static String mChannel;
     private static BigFunSDK instance;
     /**
      * 是否是Debug模式
@@ -159,22 +159,27 @@ public class BigFunSDK {
             String response = data.getStringExtra("response");
             if (TextUtils.isEmpty(response)) {
                 LogUtils.log(data.getStringExtra("nativeSdkForMerchantMessage"));
+                HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, data.getStringExtra("nativeSdkForMerchantMessage"));
                 return false;
             } else {
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     String responseCode = jsonObject.optString("RESPCODE");
                     if (TextUtils.isEmpty(responseCode)) {
+                        HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, "pay unknow error");
                         LogUtils.log("pay unknow error");
                     } else {
                         if ("01".equals(responseCode)) {
                             LogUtils.log("01--" + jsonObject.optString("STATUS"));
                             return true;
+                        } else {
+                            HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, jsonObject.optString("STATUS"));
                         }
                         LogUtils.log(responseCode + jsonObject.optString("STATUS"));
                     }
                     return false;
                 } catch (JSONException e) {
+                    HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, e.getMessage());
                     e.printStackTrace();
                     LogUtils.log(e.getMessage());
                 }

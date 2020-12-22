@@ -104,7 +104,7 @@ public class EncryptUtil {
     }
 
     // 数据加密
-    public static String encryptData(String data) throws Exception {
+    public synchronized static String encryptData(String data) throws Exception {
         String str32 = random32();
         RSAEncrypt rsa = new RSAEncrypt();
         String params = TestAESUtil.encrypt(data, str32);

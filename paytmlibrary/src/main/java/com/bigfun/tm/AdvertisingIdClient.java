@@ -14,7 +14,7 @@ import android.os.RemoteException;
 import java.util.concurrent.LinkedBlockingQueue;
 
 public class AdvertisingIdClient {
-    public static String getAdId(Context context) throws Exception {
+    public synchronized static String getAdId(Context context) throws Exception {
         if (Looper.getMainLooper() == Looper.myLooper()) {
             return "Cannot call in the main thread, You must call in the other thread";
         }

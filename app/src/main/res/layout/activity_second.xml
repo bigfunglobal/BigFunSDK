@@ -8,7 +8,8 @@
         android:id="@+id/et_order"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="请输入订单号" />
+        android:hint="请输入订单号"
+        android:text="202012222118471805415780" />
 
     <Button
         android:id="@+id/btn_order"
