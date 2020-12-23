@@ -30,17 +30,11 @@ public class EventManager {
      * @param content
      */
     public synchronized void addEvent(String action, String content) {
-//        if (reportDBHelper != null) {
-//            SQLiteDatabase database = reportDBHelper.getWritableDatabase();
-//            reportDBHelper.insert(database, action, content);
-//            upload();
-//        }
-        List<EventBean> list = new ArrayList<>();
-        EventBean bean = new EventBean();
-        bean.setActionType(action);
-        bean.setActionContent(content);
-        list.add(bean);
-        HttpUtils.getInstance().upload(list);
+        if (reportDBHelper != null) {
+            SQLiteDatabase database = reportDBHelper.getWritableDatabase();
+            reportDBHelper.insert(database, action, content);
+            upload();
+        }
     }
 
     /**
@@ -50,7 +44,9 @@ public class EventManager {
         if (reportDBHelper != null) {
             SQLiteDatabase database = reportDBHelper.getWritableDatabase();
             List<EventBean> beanList = reportDBHelper.query(database);
-            HttpUtils.getInstance().upload(beanList);
+            if (beanList != null && beanList.size() > 0) {
+                HttpUtils.getInstance().upload(beanList);
+            }
         }
     }
 
@@ -69,8 +65,11 @@ public class EventManager {
      *
      * @return
      */
-    public synchronized List<EventBean> query() {
+    public synchronized void query() {
         SQLiteDatabase database = reportDBHelper.getWritableDatabase();
-        return reportDBHelper.query(database);
+        List<EventBean> list = reportDBHelper.query(database);
+        if (list != null && list.size() > 0) {
+            HttpUtils.getInstance().upload(list);
+        }
     }
 }

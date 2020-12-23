@@ -5,21 +5,27 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.Log;
 
 import com.bigfun.tm.database.EventBean;
 import com.bigfun.tm.database.EventManager;
 import com.bigfun.tm.encrypt.EncryptUtil;
 import com.bigfun.tm.model.LoginBean;
 import com.bigfun.tm.model.PaymentOrderBean;
-import com.bigfun.tm.model.SendSmsBean;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.security.cert.CertificateException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -32,6 +38,7 @@ import okhttp3.Response;
 public class HttpUtils {
 
     private HttpUtils() {
+        okHttpClient = getUnsafeOkHttpClient();
     }
 
     private static class InstanceHolder {
@@ -44,20 +51,55 @@ public class HttpUtils {
 
     public MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
     private static final long TIME_OUT = 30L;
-    public static String mCode = "";
-    public static String mPhone = "";
     public Gson gson = new Gson();
-    public OkHttpClient okHttpClient = new OkHttpClient.Builder()
-            .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
-            .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
-            .readTimeout(TIME_OUT, TimeUnit.SECONDS)
-            .build();
+    public OkHttpClient okHttpClient;
+    //    public OkHttpClient okHttpClient = new OkHttpClient.Builder()
+//            .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+//            .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+//            .readTimeout(TIME_OUT, TimeUnit.SECONDS)
+//            .build();
     private ExecutorService mExecutors = Executors.newFixedThreadPool(2);
     public static final int REQUEST_CODE = 100;
     public static final String ORDER_FAIL = "ORDER_FAIL";
     public static final String ORDER_EXCEPTION = "ORDER_EXCEPTION";
     public static final String PAY_FAIL = "PAY_FAIL";
     public static Handler mHandler = new Handler(Looper.getMainLooper());
+
+    private static OkHttpClient getUnsafeOkHttpClient() {
+        try {
+            final TrustManager[] trustAllCerts = new TrustManager[]{
+                    new X509TrustManager() {
+                        @Override
+                        public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {
+                        }
+
+                        @Override
+                        public java.security.cert.X509Certificate[] getAcceptedIssuers() {
+                            return new java.security.cert.X509Certificate[]{};
+                        }
+                    }
+            };
+
+            final SSLContext sslContext = SSLContext.getInstance("SSL");
+            sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            final SSLSocketFactory sslSocketFactory = sslContext.getSocketFactory();
+
+            OkHttpClient.Builder builder = new OkHttpClient.Builder()
+                    .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
+                    .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
+                    .readTimeout(TIME_OUT, TimeUnit.SECONDS);
+            builder.sslSocketFactory(sslSocketFactory, (X509TrustManager) trustAllCerts[0]);
+            builder.hostnameVerifier((hostname, session) -> true);
+            OkHttpClient okHttpClient = builder.build();
+            return okHttpClient;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 
     /**
      * post请求
@@ -178,6 +220,8 @@ public class HttpUtils {
         }
     }
 
+    private static String mOrderId = "";
+
     /**
      * 预充值下单
      *
@@ -187,12 +231,17 @@ public class HttpUtils {
      * @param listener
      */
     public void payOrder(String url, Map<String, Object> params, Activity activity, ResponseListener listener) {
+        String orderId = (String) params.get("orderId");
+        if (!TextUtils.isEmpty(mOrderId) && mOrderId.equals(orderId)) {
+            return;
+        }
         if (NetworkUtils.getNetworkState(BigFunSDK.mContext) == 0) {
             return;
         }
         if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
         if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
         mExecutors.execute(new Task(listener, params, activity, url));
+        mOrderId = orderId;
     }
 
     public class Task implements Runnable {
@@ -227,42 +276,32 @@ public class HttpUtils {
                             .url(url)
                             .post(RequestBody.create(mediaType, json))
                             .build();
-                    okHttpClient.newCall(request).enqueue(new Callback() {
-                        @Override
-                        public void onFailure(Call call, IOException e) {
-                            report(ORDER_FAIL, e.getMessage());
-                            listener.onFail(e.getMessage());
-                        }
-
-                        @Override
-                        public void onResponse(Call call, Response response) throws IOException {
-                            if (response.isSuccessful()) {
-                                if (response.body() != null) {
-                                    if (response.code() == 200) {
-                                        PaymentOrderBean bean =
-                                                gson.fromJson(
-                                                        response.body().string(),
-                                                        PaymentOrderBean.class
-                                                );
-                                        if (Integer.parseInt(bean.getCode()) == 0) {
-                                            if (bean.getData() != null) {
-                                                listener.onSuccess();
-                                                PayUtils.getInstance().pay(
-                                                        bean.getData(),
-                                                        activity,
-                                                        REQUEST_CODE
-                                                );
-                                            } else {
-                                                report(ORDER_FAIL, bean.getMsg());
-                                                listener.onFail(bean.getMsg());
-                                            }
+                    Response response = okHttpClient.newCall(request).execute();
+                    if (response.isSuccessful()) {
+                        if (response.code() == 200) {
+                            if (response.body() != null) {
+                                String responseStr = response.body().string();
+                                if (!TextUtils.isEmpty(responseStr)) {
+                                    PaymentOrderBean bean =
+                                            gson.fromJson(
+                                                    responseStr,
+                                                    PaymentOrderBean.class
+                                            );
+                                    if (Integer.parseInt(bean.getCode()) == 0) {
+                                        if (bean.getData() != null) {
+                                            listener.onSuccess();
+                                            PayUtils.getInstance().pay(
+                                                    bean.getData(),
+                                                    activity,
+                                                    REQUEST_CODE
+                                            );
                                         } else {
                                             report(ORDER_FAIL, bean.getMsg());
                                             listener.onFail(bean.getMsg());
                                         }
                                     } else {
-                                        report(ORDER_FAIL, response.message());
-                                        listener.onFail(response.message());
+                                        report(ORDER_FAIL, bean.getMsg());
+                                        listener.onFail(bean.getMsg());
                                     }
                                 } else {
                                     report(ORDER_FAIL, response.message());
@@ -272,14 +311,20 @@ public class HttpUtils {
                                 report(ORDER_FAIL, response.message());
                                 listener.onFail(response.message());
                             }
+                        } else {
+                            report(ORDER_FAIL, response.message());
+                            listener.onFail(response.message());
                         }
-                    });
-                    break;
+                        break;
+                    } else {
+                        report(ORDER_FAIL, response.message());
+                        listener.onFail(response.message());
+                    }
                 } catch (Exception e) {
-                    report(ORDER_EXCEPTION, e.getMessage());
+                    LogUtils.log("order exception " + e.getMessage());
                     e.printStackTrace();
-                    listener.onFail(e.getMessage());
-                    SystemClock.sleep(500);
+                    report(ORDER_EXCEPTION, e.getMessage());
+                    SystemClock.sleep(100);
                 }
             }
         }
@@ -291,5 +336,9 @@ public class HttpUtils {
 
     public synchronized void upload(List<EventBean> list) {
         mExecutors.execute(new ReportTask(list));
+    }
+
+    public synchronized void query() {
+        mHandler.post(() -> EventManager.getInstance().query());
     }
 }

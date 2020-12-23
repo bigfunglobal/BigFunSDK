@@ -5,6 +5,7 @@ import android.provider.Settings;
 import android.text.TextUtils;
 
 import com.bigfun.tm.database.EventBean;
+import com.bigfun.tm.database.EventManager;
 import com.bigfun.tm.encrypt.EncryptUtil;
 
 import org.json.JSONArray;
@@ -65,6 +66,7 @@ public class ReportTask implements Runnable {
                             JSONObject jsonObject = new JSONObject(string);
                             String code = jsonObject.optString("code");
                             if ("0".equals(code)) {
+                                EventManager.getInstance().delete();
                                 //上报成功,将数据删除
                                 LogUtils.log("report success");
                             }

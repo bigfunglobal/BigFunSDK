@@ -42,6 +42,7 @@ public class BigFunSDK {
         mContext = context;
         mChannel = channel;
         clipboard();
+        HttpUtils.getInstance().query();
         LogUtils.log("sdk init success");
     }
 
