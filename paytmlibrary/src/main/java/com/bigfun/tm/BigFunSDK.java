@@ -24,6 +24,7 @@ import java.util.Map;
 import java.util.TreeMap;
 
 import static com.bigfun.tm.Constant.KEY_CHANNEL_CODE;
+import static com.bigfun.tm.Constant.KEY_IS_INITIALIZED;
 import static com.bigfun.tm.Constant.KEY_SOURCE;
 import static com.bigfun.tm.Constant.PAY_TAG;
 
@@ -52,7 +53,7 @@ public class BigFunSDK {
         mChannel = channel;
 //        clipboard();
         //是否已经初始化完成
-        boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_Initialized, false);
+        boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_INITIALIZED, false);
         if (isInitialized) {
             String channelCode = (String) SPUtils.getInstance().get(mContext, Constant.KEY_CHANNEL_CODE, "");
             if (!TextUtils.isEmpty(channelCode)) {
@@ -64,6 +65,27 @@ public class BigFunSDK {
             initAttribution(appGuid);
         }
         LogUtils.log("sdk init success");
+    }
+
+    /**
+     * 设置是否是Debug模式d
+     *
+     * @param debug
+     */
+    public static void setDebug(boolean debug) {
+        isDebug = debug;
+    }
+
+    @Keep
+    public static BigFunSDK getInstance() {
+        if (instance == null) {
+            synchronized (BigFunSDK.class) {
+                if (instance == null) {
+                    instance = new BigFunSDK();
+                }
+            }
+        }
+        return instance;
     }
 
     /**
@@ -82,6 +104,7 @@ public class BigFunSDK {
         Tracker.configure(new Tracker.Configuration(mContext)
                 .setAppGuid(appGuid)
                 .setAttributionUpdateListener(s -> {
+                    SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
                     if (TextUtils.isEmpty(s)) {
                         initLogin();
                     } else {
@@ -163,27 +186,6 @@ public class BigFunSDK {
                         }
                     }
                 }));
-    }
-
-    /**
-     * 设置是否是Debug模式d
-     *
-     * @param debug
-     */
-    public static void setDebug(boolean debug) {
-        isDebug = debug;
-    }
-
-    @Keep
-    public static BigFunSDK getInstance() {
-        if (instance == null) {
-            synchronized (BigFunSDK.class) {
-                if (instance == null) {
-                    instance = new BigFunSDK();
-                }
-            }
-        }
-        return instance;
     }
 
     /**

@@ -18,5 +18,5 @@ public interface Constant {
     /**
      * 是否第一次初始化
      */
-    String KEY_IS_Initialized = "KEY_IS_Initialized";
+    String KEY_IS_INITIALIZED = "KEY_IS_Initialized";
 }
