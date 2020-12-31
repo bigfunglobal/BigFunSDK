@@ -7,4 +7,16 @@ public interface Constant {
     String KEY_EMAIL = "KEY_EMAIL";
     String KEY_PHONE = "KEY_PHONE";
     String KEY_LOGIN_PHONE = "KEY_LOGIN_PHONE";
+    /**
+     * 归因后的渠道号
+     */
+    String KEY_CHANNEL_CODE = "KEY_CHANNEL_CODE";
+    /**
+     * 归因来源
+     */
+    String KEY_SOURCE = "KEY_SOURCE";
+    /**
+     * 是否第一次初始化
+     */
+    String KEY_IS_Initialized = "KEY_IS_Initialized";
 }

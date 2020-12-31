@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.bigfun.tm.encrypt.DesUtils;
 import com.bigfun.tm.login.Callback;
+import com.kochava.base.Tracker;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -22,6 +23,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.TreeMap;
 
+import static com.bigfun.tm.Constant.KEY_CHANNEL_CODE;
+import static com.bigfun.tm.Constant.KEY_SOURCE;
 import static com.bigfun.tm.Constant.PAY_TAG;
 
 @Keep
@@ -37,18 +40,129 @@ public class BigFunSDK {
      * 是否是Debug模式
      */
     static boolean isDebug = false;
-    private static String mSource;
+    private static String mSource = "googleplay";
 
     private BigFunSDK() {
 
     }
 
     @Keep
-    public void init(Context context, String channel) {
+    public void init(Context context, String channel, String appGuid) {
         mContext = context;
         mChannel = channel;
-        clipboard();
+//        clipboard();
+        //是否已经初始化完成
+        boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_Initialized, false);
+        if (isInitialized) {
+            String channelCode = (String) SPUtils.getInstance().get(mContext, Constant.KEY_CHANNEL_CODE, "");
+            if (!TextUtils.isEmpty(channelCode)) {
+                mChannel = channelCode;
+            }
+            mSource = (String) SPUtils.getInstance().get(mContext, Constant.KEY_SOURCE, "googleplay");
+            initLogin();
+        } else {
+            initAttribution(appGuid);
+        }
         LogUtils.log("sdk init success");
+    }
+
+    /**
+     * 归因
+     * 第一种情况是自然量，即从googleplay下载，这种情况channelCode=channelCode，source=googleplay
+     * 第二种情况是smartlink，解析返回的json数据，channelCode=jsonObject->site_id,source=jsonObject->creative_id
+     * 第三种情况是facebook广告或者google广告，这两种数据格式是相同的,都是用tracker_id作为channelCode，source不同。
+     * facebook使用campaign_group_id，google使用campaignid
+     * channelCode = jsonObject->data->attribution->tracker_id
+     * source(facebook)=jsonObject->data->attribution->campaign_group_id
+     * source(google)=jsonObject->data->attribution->campaignid
+     *
+     * @param appGuid
+     */
+    private void initAttribution(String appGuid) {
+        Tracker.configure(new Tracker.Configuration(mContext)
+                .setAppGuid(appGuid)
+                .setAttributionUpdateListener(s -> {
+                    if (TextUtils.isEmpty(s)) {
+                        initLogin();
+                    } else {
+                        try {
+                            JSONObject jsonObject = new JSONObject(s);
+                            String attribution = jsonObject.optString("attribution");
+                            if (!TextUtils.isEmpty(attribution) && "false".equals(attribution)) {
+                                //自然量(从googleplay下载)
+                                initLogin();
+                            } else {
+                                //channelCode
+                                String siteId = jsonObject.optString("site_id");
+                                if (TextUtils.isEmpty(siteId)) {
+                                    //如果siteId为空，说明该成没有这个字段，即不是smartlink
+                                    SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, siteId);
+                                    mChannel = siteId;
+                                    //source
+                                    String source = jsonObject.optString("creative_id");
+                                    if (!TextUtils.isEmpty(source)) {
+                                        SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
+                                        mSource = source;
+                                    }
+                                } else {
+                                    //google或者facebook
+                                    String data = jsonObject.optString("data");
+                                    if (TextUtils.isEmpty(data)) {
+                                        //如果为空则表示不是google或者facebook
+                                        initLogin();
+                                    } else {
+                                        JSONObject dataJson = new JSONObject(data);
+                                        String attribution1 = dataJson.optString("attribution");
+                                        if (TextUtils.isEmpty(attribution1)) {
+                                            initLogin();
+                                        } else {
+                                            JSONObject attributionJson = new JSONObject(attribution1);
+                                            String networkKey = attributionJson.optString("network_key");
+                                            if (TextUtils.isEmpty(networkKey)) {
+                                                initLogin();
+                                            } else {
+                                                if ("facebook".equalsIgnoreCase(networkKey)) {
+                                                    String trackerId = attributionJson.optString("tracker_id");
+                                                    if (TextUtils.isEmpty(trackerId)) {
+                                                        initLogin();
+                                                    } else {
+                                                        SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
+                                                        mChannel = trackerId;
+                                                        String source = attributionJson.optString("campaign_group_id");
+                                                        if (TextUtils.isEmpty(source)) {
+                                                            SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
+                                                            mSource = source;
+                                                        }
+                                                    }
+                                                } else if ("google".equalsIgnoreCase(networkKey)) {
+                                                    String trackerId = attributionJson.optString("tracker_id");
+                                                    if (TextUtils.isEmpty(trackerId)) {
+                                                        initLogin();
+                                                    } else {
+                                                        SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
+                                                        mChannel = trackerId;
+                                                        String source = attributionJson.optString("campaignid");
+                                                        if (TextUtils.isEmpty(source)) {
+                                                            SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
+                                                            mSource = source;
+                                                        }
+                                                        initLogin();
+                                                    }
+                                                } else {
+                                                    initLogin();
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                            }
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            initLogin();
+                        }
+                    }
+                }));
     }
 
     /**
