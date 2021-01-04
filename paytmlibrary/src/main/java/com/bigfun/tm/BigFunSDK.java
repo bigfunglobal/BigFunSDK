@@ -35,13 +35,14 @@ public class BigFunSDK {
     private StringBuilder sb = new StringBuilder();
     public String mPhone = "";
     public static Context mContext;
-    private static String mChannel;
+    public static String mChannel;
     private static BigFunSDK instance;
     /**
      * 是否是Debug模式
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
+    private static final String VERSION = "1.3.9";
 
     private BigFunSDK() {
 
@@ -51,8 +52,10 @@ public class BigFunSDK {
     public void init(Context context, String channel, String appGuid) {
         mContext = context;
         mChannel = channel;
-//        clipboard();
-        //是否已经初始化完成
+        if (TextUtils.isEmpty(appGuid)) {
+            throw new IllegalArgumentException(PAY_TAG + "appGuid is must");
+        }
+        //是否已经归因
         boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_INITIALIZED, false);
         if (isInitialized) {
             String channelCode = (String) SPUtils.getInstance().get(mContext, Constant.KEY_CHANNEL_CODE, "");
@@ -62,6 +65,7 @@ public class BigFunSDK {
             mSource = (String) SPUtils.getInstance().get(mContext, Constant.KEY_SOURCE, "googleplay");
             initLogin();
         } else {
+            SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
             initAttribution(appGuid);
         }
         LogUtils.log("sdk init success");
@@ -104,7 +108,6 @@ public class BigFunSDK {
         Tracker.configure(new Tracker.Configuration(mContext)
                 .setAppGuid(appGuid)
                 .setAttributionUpdateListener(s -> {
-                    SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
                     if (TextUtils.isEmpty(s)) {
                         initLogin();
                     } else {
@@ -117,8 +120,8 @@ public class BigFunSDK {
                             } else {
                                 //channelCode
                                 String siteId = jsonObject.optString("site_id");
-                                if (TextUtils.isEmpty(siteId)) {
-                                    //如果siteId为空，说明该成没有这个字段，即不是smartlink
+                                if (!TextUtils.isEmpty(siteId)) {
+                                    //如果siteId不为空，说明是smartlink
                                     SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, siteId);
                                     mChannel = siteId;
                                     //source
@@ -127,6 +130,7 @@ public class BigFunSDK {
                                         SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                         mSource = source;
                                     }
+                                    initLogin();
                                 } else {
                                     //google或者facebook
                                     String data = jsonObject.optString("data");
@@ -146,9 +150,7 @@ public class BigFunSDK {
                                             } else {
                                                 if ("facebook".equalsIgnoreCase(networkKey)) {
                                                     String trackerId = attributionJson.optString("tracker_id");
-                                                    if (TextUtils.isEmpty(trackerId)) {
-                                                        initLogin();
-                                                    } else {
+                                                    if (!TextUtils.isEmpty(trackerId)) {
                                                         SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
                                                         mChannel = trackerId;
                                                         String source = attributionJson.optString("campaign_group_id");
@@ -157,11 +159,10 @@ public class BigFunSDK {
                                                             mSource = source;
                                                         }
                                                     }
+                                                    initLogin();
                                                 } else if ("google".equalsIgnoreCase(networkKey)) {
                                                     String trackerId = attributionJson.optString("tracker_id");
-                                                    if (TextUtils.isEmpty(trackerId)) {
-                                                        initLogin();
-                                                    } else {
+                                                    if (!TextUtils.isEmpty(trackerId)) {
                                                         SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
                                                         mChannel = trackerId;
                                                         String source = attributionJson.optString("campaignid");
@@ -169,8 +170,8 @@ public class BigFunSDK {
                                                             SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                                             mSource = source;
                                                         }
-                                                        initLogin();
                                                     }
+                                                    initLogin();
                                                 } else {
                                                     initLogin();
                                                 }
@@ -212,7 +213,7 @@ public class BigFunSDK {
             map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
             map.put("ip", IpUtils.getOutNetIP(mContext, 0));
             map.put("channelCode", mChannel);
-            map.put("verCode", Utils.getVersionName(mContext));
+            map.put("verCode", VERSION);
             map.put("source", mSource);
             map.put("packageName", mContext.getPackageName());
             if (!map.containsKey("email")) {
@@ -367,6 +368,7 @@ public class BigFunSDK {
         map.put("ip", IpUtils.getOutNetIP(mContext, 0));
         map.put("gameUserId", "0");
         map.put("channelCode", mChannel);
+        map.put("source", mSource);
         HttpUtils.getInstance().getChannelConfig(NetConstant.GET_CHANNEL_CONFIG, map, callback);
     }
 
@@ -492,22 +494,27 @@ public class BigFunSDK {
             String response = data.getStringExtra("response");
             if (TextUtils.isEmpty(response)) {
                 LogUtils.log(data.getStringExtra("nativeSdkForMerchantMessage"));
+                HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, data.getStringExtra("nativeSdkForMerchantMessage"));
                 return false;
             } else {
                 try {
                     JSONObject jsonObject = new JSONObject(response);
                     String responseCode = jsonObject.optString("RESPCODE");
                     if (TextUtils.isEmpty(responseCode)) {
+                        HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, "pay unknow error");
                         LogUtils.log("pay unknow error");
                     } else {
                         if ("01".equals(responseCode)) {
                             LogUtils.log("01--" + jsonObject.optString("STATUS"));
                             return true;
+                        } else {
+                            HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, jsonObject.optString("STATUS"));
                         }
                         LogUtils.log(responseCode + jsonObject.optString("STATUS"));
                     }
                     return false;
                 } catch (JSONException e) {
+                    HttpUtils.getInstance().report(HttpUtils.PAY_FAIL, e.getMessage());
                     e.printStackTrace();
                     LogUtils.log(e.getMessage());
                 }
@@ -639,6 +646,7 @@ public class BigFunSDK {
             throw new IllegalArgumentException(PAY_TAG + "缺少参数");
         }
         Map<String, Object> map = new HashMap<>(params);
+        map.put("source", mSource);
         HttpUtils.getInstance().payOrder(NetConstant.PAY_URL, map, activity, 100, listener);
     }
 }

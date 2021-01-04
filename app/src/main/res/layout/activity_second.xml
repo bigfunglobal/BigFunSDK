@@ -19,12 +19,6 @@
         android:hint="请输入验证码" />
 
     <Button
-        android:id="@+id/btn_order"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="充值下单" />
-
-    <Button
         android:id="@+id/btn_builder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

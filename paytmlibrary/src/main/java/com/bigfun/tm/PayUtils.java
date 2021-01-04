@@ -27,35 +27,36 @@ public class PayUtils {
     public void pay(PaymentOrderBean.DataBean bean,
                     Activity activity,
                     int requestCode) {
-        if (Integer.parseInt(bean.getPaymentChannel()) == 1) {
-            if (Integer.parseInt(bean.getOpenType()) == 5) {
+        //PaymentChannel == 1 paytm
+        //OpenType == 5 SDK open
+        int openType = Integer.parseInt(bean.getOpenType());
+        int paymentChannel = Integer.parseInt(bean.getPaymentChannel());
+        if (openType == 5) { //sdk open
+            if (paymentChannel == 1) { //paytm
                 paytm(bean, activity, requestCode);
-            } else {
+            } else { //保底使用H5
                 activity.runOnUiThread(() -> {
                     Intent intent = new Intent(activity, PayActivity.class);
                     intent.putExtra(Constant.EXTRA_KEY_PAY_URL, bean.getJumpUrl());
                     activity.startActivity(intent);
                 });
             }
-        } else if (Integer.parseInt(bean.getPaymentChannel()) == 0) {
-            if (Integer.parseInt(bean.getOpenType()) == 1) {
-                activity.runOnUiThread(() -> {
-                    Intent intent = new Intent(activity, PayActivity.class);
-                    intent.putExtra(Constant.EXTRA_KEY_PAY_URL, bean.getJumpUrl());
-                    activity.startActivity(intent);
-                });
-            } else {
-                activity.runOnUiThread(() -> {
-                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getJumpUrl()));
-                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    activity.startActivity(intent);
-                });
-            }
+        } else if (openType == 2) { //浏览器打开
+            activity.runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(bean.getJumpUrl()));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(intent);
+            });
+        } else if (openType == 6) { //UPI
+            activity.runOnUiThread(() -> {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(""));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                activity.startActivity(intent);
+            });
         } else {
             activity.runOnUiThread(() -> {
                 Intent intent = new Intent(activity, PayActivity.class);
-                String url = bean.getJumpUrl();
-                intent.putExtra(Constant.EXTRA_KEY_PAY_URL, url);
+                intent.putExtra(Constant.EXTRA_KEY_PAY_URL, bean.getJumpUrl());
                 activity.startActivity(intent);
             });
         }

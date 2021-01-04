@@ -1,8 +1,13 @@
 package com.bigfun.tm;
 
 import android.app.Activity;
+import android.os.Handler;
+import android.os.Looper;
+import android.os.SystemClock;
 import android.text.TextUtils;
 
+import com.bigfun.tm.database.EventBean;
+import com.bigfun.tm.database.EventManager;
 import com.bigfun.tm.encrypt.EncryptUtil;
 import com.bigfun.tm.model.LoginBean;
 import com.bigfun.tm.model.PaymentOrderBean;
@@ -10,7 +15,10 @@ import com.bigfun.tm.model.SendSmsBean;
 import com.google.gson.Gson;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
 import okhttp3.Call;
@@ -36,15 +44,21 @@ public class HttpUtils {
 
     private MediaType mediaType = MediaType.parse("application/json; charset=utf-8");
     private String token = (String) SPUtils.getInstance().get(BigFunSDK.mContext, "accessToken", "");
-    private static final long TIME_OUT = 10L;
+    private static final long TIME_OUT = 30L;
     public static String mCode = "";
     public static String mPhone = "";
     private Gson gson = new Gson();
-    private OkHttpClient okHttpClient = new OkHttpClient.Builder()
+    public OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .connectTimeout(TIME_OUT, TimeUnit.SECONDS)
             .writeTimeout(TIME_OUT, TimeUnit.SECONDS)
             .readTimeout(TIME_OUT, TimeUnit.SECONDS)
             .build();
+    private ExecutorService mExecutors = Executors.newFixedThreadPool(2);
+    public static final String ORDER_FAIL = "ORDER_FAIL";
+    public static final String ORDER_EXCEPTION = "ORDER_EXCEPTION";
+    public static final String PAY_FAIL = "PAY_FAIL";
+    public static Handler mHandler = new Handler(Looper.getMainLooper());
+    public static final int REQUEST_CODE = 100;
 
     /**
      * post请求
@@ -389,6 +403,11 @@ public class HttpUtils {
     }
 
     /**
+     * 订单号
+     */
+    private String mOrderId;
+
+    /**
      * 预充值下单
      *
      * @param url
@@ -398,59 +417,114 @@ public class HttpUtils {
      * @param listener
      */
     public void payOrder(String url, Map<String, Object> params, Activity activity, int requestCode, ResponseListener listener) {
+        String orderId = (String) params.get("orderId");
+        if (!TextUtils.isEmpty(mOrderId) && mOrderId.equals(orderId)) {
+            return;
+        }
+        if (NetworkUtils.getNetworkState(BigFunSDK.mContext) == 0) {
+            return;
+        }
         if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
         if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
-        String json = null;
-        try {
-            json = EncryptUtil.encryptData(gson.toJson(params));
-            Request request = new Request.Builder()
-                    .url(url)
-                    .post(RequestBody.create(mediaType, json))
-                    .build();
-            okHttpClient.newCall(request).enqueue(new Callback() {
-                @Override
-                public void onFailure(Call call, IOException e) {
-                    listener.onFail(e.getMessage());
-                }
+        mExecutors.execute(new Task(listener, params, activity, url));
+        mOrderId = orderId;
+    }
 
-                @Override
-                public void onResponse(Call call, Response response) throws IOException {
+    public class Task implements Runnable {
+
+        /**
+         * 最大请求次数
+         */
+        private static final int MAX_TIMES = 3;
+        private int mRequestTimes = 0;
+        private ResponseListener listener;
+        private Map<String, Object> params;
+        private Activity activity;
+
+        public Task(ResponseListener listener, Map<String, Object> params, Activity activity, String url) {
+            this.listener = listener;
+            this.params = params;
+            this.activity = activity;
+            this.url = url;
+        }
+
+        private String url;
+
+        @Override
+        public void run() {
+            String json = null;
+            mRequestTimes = 0;
+            while (mRequestTimes < MAX_TIMES) {
+                mRequestTimes++;
+                try {
+                    json = EncryptUtil.encryptData(gson.toJson(params));
+                    Request request = new Request.Builder()
+                            .url(url)
+                            .post(RequestBody.create(mediaType, json))
+                            .build();
+                    Response response = okHttpClient.newCall(request).execute();
                     if (response.isSuccessful()) {
-                        if (response.body() != null) {
-                            if (response.code() == 200) {
-                                PaymentOrderBean bean =
-                                        gson.fromJson(
-                                                response.body().string(),
-                                                PaymentOrderBean.class
-                                        );
-                                if (Integer.parseInt(bean.getCode()) == 0) {
-                                    if (bean.getData() != null) {
-                                        listener.onSuccess();
-                                        PayUtils.getInstance().pay(
-                                                bean.getData(),
-                                                activity,
-                                                requestCode
-                                        );
+                        if (response.code() == 200) {
+                            if (response.body() != null) {
+                                String responseStr = response.body().string();
+                                if (!TextUtils.isEmpty(responseStr)) {
+                                    PaymentOrderBean bean =
+                                            gson.fromJson(
+                                                    responseStr,
+                                                    PaymentOrderBean.class
+                                            );
+                                    if (Integer.parseInt(bean.getCode()) == 0) {
+                                        if (bean.getData() != null) {
+                                            listener.onSuccess();
+                                            PayUtils.getInstance().pay(
+                                                    bean.getData(),
+                                                    activity,
+                                                    REQUEST_CODE
+                                            );
+                                        } else {
+                                            report(ORDER_FAIL, bean.getMsg());
+                                            listener.onFail(bean.getMsg());
+                                        }
                                     } else {
+                                        report(ORDER_FAIL, bean.getMsg());
                                         listener.onFail(bean.getMsg());
                                     }
                                 } else {
-                                    listener.onFail(bean.getMsg());
+                                    report(ORDER_FAIL, response.message());
+                                    listener.onFail(response.message());
                                 }
                             } else {
+                                report(ORDER_FAIL, response.message());
                                 listener.onFail(response.message());
                             }
                         } else {
+                            report(ORDER_FAIL, response.message());
                             listener.onFail(response.message());
                         }
+                        break;
                     } else {
+                        report(ORDER_FAIL, response.message());
                         listener.onFail(response.message());
                     }
+                } catch (Exception e) {
+                    LogUtils.log("order exception " + e.getMessage());
+                    e.printStackTrace();
+                    report(ORDER_EXCEPTION, e.getMessage());
+                    SystemClock.sleep(200);
                 }
-            });
-        } catch (Exception e) {
-            e.printStackTrace();
-            listener.onFail(e.getMessage());
+            }
         }
+    }
+
+    public synchronized void report(String action, String content) {
+        mHandler.post(() -> EventManager.getInstance().addEvent(action, content));
+    }
+
+    public synchronized void upload(List<EventBean> list) {
+        mExecutors.execute(new ReportTask(list));
+    }
+
+    public synchronized void query() {
+        mHandler.post(() -> EventManager.getInstance().query());
     }
 }

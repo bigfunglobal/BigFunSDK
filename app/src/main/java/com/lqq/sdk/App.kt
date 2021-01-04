@@ -17,8 +17,8 @@ class App : Application() {
         BigFunSDK.setDebug(true)
         BigFunSDK.getInstance().init(
             applicationContext,
-            "test_fb",
-            ""
+            "bmartpay_test",
+            "kofreedemo-5jzrjmrf3"
         )
         BigFunChat.init(applicationContext)
     }

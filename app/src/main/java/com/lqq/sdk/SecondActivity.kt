@@ -25,27 +25,6 @@ class SecondActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)
 
-        btn_order.setOnClickListener {
-            BigFunSDK.getInstance().rechargeOrder(
-                mapOf(
-                    "outUserId" to "0",
-                    "outOrderNo" to "774",
-                    "commodityId" to "10RUPEE",
-                    "mobile" to "7402603943",
-                    "email" to "3859034@qq.com"
-                ),
-                this, object : ResponseListener {
-                    override fun onFail(msg: String) {
-                        Log.d(TAG, "onFail: $msg")
-                    }
-
-                    override fun onSuccess() {
-                        Log.d(TAG, "onResult: ")
-                    }
-                }
-            )
-        }
-
         btn_builder.setOnClickListener {
             val dialog = CustomDialog(this)
             dialog.show()
@@ -113,7 +92,7 @@ class SecondActivity : AppCompatActivity() {
 
         btn_order2.setOnClickListener {
             BigFunSDK.getInstance().payOrder(
-                mutableMapOf<String, Any>("orderId" to "202011251913047466684988"),
+                mutableMapOf<String, Any>("orderId" to "202101041111569337298197"),
                 this,
                 object : ResponseListener {
                     override fun onSuccess() {
