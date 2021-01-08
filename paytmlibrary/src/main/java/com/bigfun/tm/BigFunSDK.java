@@ -43,7 +43,7 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.3.9";
+    private static final String VERSION = "1.4.0";
 
     private BigFunSDK() {
 
