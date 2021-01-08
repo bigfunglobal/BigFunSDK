@@ -92,7 +92,7 @@ class SecondActivity : AppCompatActivity() {
 
         btn_order2.setOnClickListener {
             BigFunSDK.getInstance().payOrder(
-                mutableMapOf<String, Any>("orderId" to "202101041111569337298197"),
+                mutableMapOf<String, Any>("orderId" to "202101051857254645125082"),
                 this,
                 object : ResponseListener {
                     override fun onSuccess() {

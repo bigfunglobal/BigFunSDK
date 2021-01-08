@@ -18,7 +18,7 @@ class App : Application() {
         BigFunSDK.getInstance().init(
             applicationContext,
             "bmartpay_test",
-            "kofreedemo-5jzrjmrf3"
+            "kofzgp-teenpatti-city-655"
         )
         BigFunChat.init(applicationContext)
     }

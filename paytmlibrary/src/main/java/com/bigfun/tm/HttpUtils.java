@@ -294,6 +294,7 @@ public class HttpUtils {
     /**
      * 充值下单
      */
+    @Deprecated
     public void paymentOrder(String url, Map<String, Object> params, Activity activity, int requestCode, ResponseListener listener) {
         if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
         if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
@@ -330,7 +331,8 @@ public class HttpUtils {
                                         PayUtils.getInstance().pay(
                                                 bean.getData(),
                                                 activity,
-                                                requestCode
+                                                requestCode,
+                                                listener
                                         );
                                     } else {
                                         listener.onFail(bean.getMsg());
@@ -479,7 +481,8 @@ public class HttpUtils {
                                             PayUtils.getInstance().pay(
                                                     bean.getData(),
                                                     activity,
-                                                    REQUEST_CODE
+                                                    REQUEST_CODE,
+                                                    listener
                                             );
                                         } else {
                                             report(ORDER_FAIL, bean.getMsg());
