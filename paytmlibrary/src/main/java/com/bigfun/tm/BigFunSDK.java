@@ -32,12 +32,11 @@ import static com.bigfun.tm.Constant.PAY_TAG;
 @Keep
 public class BigFunSDK {
 
-    private TreeMap<String, Object> treeMap = new TreeMap<>(String::compareTo);
-    private StringBuilder sb = new StringBuilder();
     public String mPhone = "";
     public static Context mContext;
     public static String mChannel;
     private static BigFunSDK instance;
+    private IAttributionListener mListener;
     /**
      * 是否是Debug模式
      */
@@ -50,9 +49,10 @@ public class BigFunSDK {
     }
 
     @Keep
-    public void init(Context context, String channel, String appGuid) {
+    public void init(Context context, String channel, String appGuid, IAttributionListener listener) {
         mContext = context;
         mChannel = channel;
+        mListener = listener;
         checkSdkNotInit();
         //是否已经归因
         boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_INITIALIZED, false);
@@ -62,6 +62,7 @@ public class BigFunSDK {
                 mChannel = channelCode;
             }
             mSource = (String) SPUtils.getInstance().get(mContext, Constant.KEY_SOURCE, "googleplay");
+            mListener.attribution(mChannel, mSource);
             initLogin();
         } else {
             SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
@@ -104,7 +105,7 @@ public class BigFunSDK {
      * @param appGuid
      */
     private void initAttribution(String appGuid) {
-        try{
+        try {
             Tracker.configure(new Tracker.Configuration(mContext)
                     .setAppGuid(appGuid)
                     .setAttributionUpdateListener(s -> {
@@ -186,8 +187,10 @@ public class BigFunSDK {
                                 initLogin();
                             }
                         }
+                        mListener.attribution(mChannel, mSource);
                     }));
-        }catch (Exception e){
+        } catch (Exception e) {
+            mListener.attribution(mChannel, mSource);
             e.printStackTrace();
         }
     }
@@ -482,7 +485,7 @@ public class BigFunSDK {
      * 检查是否初始化
      */
     private boolean checkSdkNotInit() {
-        if (TextUtils.isEmpty(mChannel) || mContext == null) {
+        if (TextUtils.isEmpty(mChannel) || mContext == null || mListener == null) {
             LogUtils.log("sdk not init");
             return true;
         }
