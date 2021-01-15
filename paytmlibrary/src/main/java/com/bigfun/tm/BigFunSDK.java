@@ -40,7 +40,7 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.4.3";
+    private static final String VERSION = "1.4.4";
 
     private BigFunSDK() {
 
@@ -62,6 +62,8 @@ public class BigFunSDK {
             mSource = (String) SPUtils.getInstance().get(mContext, Constant.KEY_SOURCE, "googleplay");
             mListener.attribution(mChannel, mSource);
             initLogin();
+            Tracker.configure(new Tracker.Configuration(mContext)
+                    .setAppGuid(appGuid));
         } else {
             SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
             initAttribution(appGuid);

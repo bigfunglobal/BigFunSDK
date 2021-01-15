@@ -6,6 +6,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.ArrayMap
 import android.util.Log
 import android.widget.Toast
+import com.bigfun.tm.BigFunEvent
 import com.bigfun.tm.BigFunSDK
 import com.bigfun.tm.CustomDialog
 import com.bigfun.tm.ResponseListener
