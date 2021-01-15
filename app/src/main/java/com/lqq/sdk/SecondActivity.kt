@@ -11,7 +11,6 @@ import com.bigfun.tm.CustomDialog
 import com.bigfun.tm.ResponseListener
 import com.bigfun.tm.chat.BigFunChat
 import com.bigfun.tm.login.Callback
-import com.facebook.CallbackManager
 import kotlinx.android.synthetic.main.activity_second.*
 
 
