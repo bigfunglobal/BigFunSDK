@@ -12,7 +12,6 @@ import android.support.annotation.Keep;
 import android.text.TextUtils;
 import android.widget.Toast;
 
-import com.bigfun.tm.database.EventManager;
 import com.bigfun.tm.encrypt.DesUtils;
 import com.bigfun.tm.login.Callback;
 import com.kochava.base.Tracker;
@@ -22,7 +21,6 @@ import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.TreeMap;
 
 import static com.bigfun.tm.Constant.KEY_CHANNEL_CODE;
 import static com.bigfun.tm.Constant.KEY_IS_INITIALIZED;
@@ -42,7 +40,7 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.4.1";
+    private static final String VERSION = "1.4.2";
 
     private BigFunSDK() {
 
@@ -109,6 +107,7 @@ public class BigFunSDK {
             Tracker.configure(new Tracker.Configuration(mContext)
                     .setAppGuid(appGuid)
                     .setAttributionUpdateListener(s -> {
+                        LogUtils.log(s);
                         if (TextUtils.isEmpty(s)) {
                             initLogin();
                         } else {
@@ -155,7 +154,7 @@ public class BigFunSDK {
                                                             SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
                                                             mChannel = trackerId;
                                                             String source = attributionJson.optString("campaign_group_id");
-                                                            if (TextUtils.isEmpty(source)) {
+                                                            if (!TextUtils.isEmpty(source)) {
                                                                 SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                                                 mSource = source;
                                                             }
@@ -167,7 +166,7 @@ public class BigFunSDK {
                                                             SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
                                                             mChannel = trackerId;
                                                             String source = attributionJson.optString("campaignid");
-                                                            if (TextUtils.isEmpty(source)) {
+                                                            if (!TextUtils.isEmpty(source)) {
                                                                 SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                                                 mSource = source;
                                                             }
@@ -368,15 +367,17 @@ public class BigFunSDK {
      */
     @Keep
     public <T> void getChannelConfig(Callback<T> callback) {
+        new Thread(() -> {
+            Map<String, Object> map = new HashMap<>();
+            map.put("ip", IpUtils.getOutNetIP(mContext, 0));
+            map.put("gameUserId", "0");
+            map.put("channelCode", mChannel);
+            map.put("source", mSource);
+            HttpUtils.getInstance().getChannelConfig(NetConstant.GET_CHANNEL_CONFIG, map, callback);
+        }).start();
         if (checkSdkNotInit()) {
             return;
         }
-        Map<String, Object> map = new HashMap<>();
-        map.put("ip", IpUtils.getOutNetIP(mContext, 0));
-        map.put("gameUserId", "0");
-        map.put("channelCode", mChannel);
-        map.put("source", mSource);
-        HttpUtils.getInstance().getChannelConfig(NetConstant.GET_CHANNEL_CONFIG, map, callback);
     }
 
     /**

@@ -19,8 +19,6 @@ private const val TAG = "SecondActivity"
 
 class SecondActivity : AppCompatActivity() {
 
-    private val callbackManager = CallbackManager.Factory.create()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_second)

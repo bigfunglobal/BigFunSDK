@@ -5,8 +5,6 @@ import android.content.Context
 import android.support.multidex.MultiDex
 import android.util.Log
 import com.bigfun.tm.BigFunSDK
-import com.bigfun.tm.IAttributionListener
-import com.bigfun.tm.chat.BigFunChat
 
 private const val TAG = "App"
 
@@ -22,10 +20,9 @@ class App : Application() {
         BigFunSDK.getInstance().init(
             applicationContext,
             "bmartpay_test",
-            "kofzgp-teenpatti-city-655"
+            "kofreedemo-5jzrjmrf3"
         ) { channelCode, source ->
             Log.d(TAG, "onCreate: $channelCode--$source")
         }
-        BigFunChat.init(applicationContext)
     }
 }
