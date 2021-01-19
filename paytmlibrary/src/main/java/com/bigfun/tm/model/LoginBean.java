@@ -57,6 +57,15 @@ public class LoginBean {
         private String userId;
         private long expiredTime;
         private String username;
+        private String kochavaAppguid;
+
+        public String getKochavaAppguid() {
+            return kochavaAppguid;
+        }
+
+        public void setKochavaAppguid(String kochavaAppguid) {
+            this.kochavaAppguid = kochavaAppguid;
+        }
 
         public String getHeadImg() {
             return headImg;

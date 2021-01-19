@@ -404,6 +404,60 @@ public class HttpUtils {
 
     }
 
+    public void initLogin(String url, Map<String, Object> params, com.bigfun.tm.login.Callback<LoginBean> listener) {
+        if (TextUtils.isEmpty(url)) throw new IllegalArgumentException("url.length() == 0");
+        if (params.isEmpty()) throw new IllegalArgumentException("params.size == 0");
+        String json = null;
+        try {
+            json = EncryptUtil.encryptData(gson.toJson(params));
+            Request request = new Request.Builder()
+                    .url(url)
+                    .addHeader(
+                            "accessToken",
+                            (String) SPUtils.getInstance().get(BigFunSDK.mContext, Constant.KEY_TOKEN, "")
+                    )
+                    .post(RequestBody.create(mediaType, json))
+                    .build();
+            okHttpClient.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                    listener.onFail(e.getMessage());
+                }
+
+                @Override
+                public void onResponse(Call call, Response response) throws IOException {
+                    try {
+                        if (response.isSuccessful()) {
+                            if (response.code() == 200) {
+                                if (response.body() != null) {
+                                    LoginBean loginBean =
+                                            gson.fromJson(response.body().string(), LoginBean.class);
+                                    if (Integer.parseInt(loginBean.getCode()) == 0) {
+                                        listener.onResult(loginBean);
+                                    } else {
+                                        SPUtils.getInstance().remove(BigFunSDK.mContext, "channel");
+                                        listener.onFail(loginBean.getMsg());
+                                    }
+                                } else {
+                                    listener.onFail(response.message());
+                                }
+                            } else {
+                                SPUtils.getInstance().remove(BigFunSDK.mContext, "channel");
+                                listener.onFail(response.message());
+                            }
+                        } else {
+                            listener.onFail(response.code() + "--" + response.message());
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
     /**
      * 订单号
      */

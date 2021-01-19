@@ -14,6 +14,7 @@ import android.widget.Toast;
 
 import com.bigfun.tm.encrypt.DesUtils;
 import com.bigfun.tm.login.Callback;
+import com.bigfun.tm.model.LoginBean;
 import com.kochava.base.Tracker;
 
 import org.json.JSONException;
@@ -40,34 +41,20 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.4.4";
+    private static final String VERSION = "1.4.5";
 
     private BigFunSDK() {
 
     }
 
     @Keep
-    public void init(Context context, String channel, String appGuid, IAttributionListener listener) {
+    public void init(Context context, String channel, IAttributionListener listener) {
         mContext = context;
         mChannel = channel;
         mListener = listener;
         checkSdkNotInit();
+        initLogin();
         //是否已经归因
-        boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_INITIALIZED, false);
-        if (isInitialized) {
-            String channelCode = (String) SPUtils.getInstance().get(mContext, Constant.KEY_CHANNEL_CODE, "");
-            if (!TextUtils.isEmpty(channelCode)) {
-                mChannel = channelCode;
-            }
-            mSource = (String) SPUtils.getInstance().get(mContext, Constant.KEY_SOURCE, "googleplay");
-            mListener.attribution(mChannel, mSource);
-            initLogin();
-            Tracker.configure(new Tracker.Configuration(mContext)
-                    .setAppGuid(appGuid));
-        } else {
-            SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
-            initAttribution(appGuid);
-        }
         LogUtils.log("sdk init success");
     }
 
@@ -93,32 +80,52 @@ public class BigFunSDK {
     }
 
     /**
+     * 检查是否需要归因
+     *
+     * @param appGuid
+     */
+    private void initAttribution(String appGuid) {
+        boolean isInitialized = (boolean) SPUtils.getInstance().get(mContext, Constant.KEY_IS_INITIALIZED, false);
+        if (isInitialized) {
+            String channelCode = (String) SPUtils.getInstance().get(mContext, Constant.KEY_CHANNEL_CODE, "");
+            if (!TextUtils.isEmpty(channelCode)) {
+                mChannel = channelCode;
+            }
+            mSource = (String) SPUtils.getInstance().get(mContext, Constant.KEY_SOURCE, "googleplay");
+            mListener.attribution(mChannel, mSource);
+            Tracker.configure(new Tracker.Configuration(mContext)
+                    .setAppGuid(appGuid));
+        } else {
+            SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
+            attribution(appGuid);
+        }
+    }
+
+    /**
      * 归因
      * 第一种情况是自然量，即从googleplay下载，这种情况channelCode=channelCode，source=googleplay
      * 第二种情况是smartlink，解析返回的json数据，channelCode=jsonObject->site_id,source=jsonObject->creative_id
-     * 第三种情况是facebook广告或者google广告，这两种数据格式是相同的,都是用tracker_id作为channelCode，source不同。
+     * 第三种情况是facebook广告或者google广告，这两种数据格式是相同的,都是用tracker作为channelCode，source不同。
      * facebook使用campaign_group_id，google使用campaignid
-     * channelCode = jsonObject->data->attribution->tracker_id
+     * channelCode = jsonObject->data->attribution->tracker
      * source(facebook)=jsonObject->data->attribution->campaign_group_id
      * source(google)=jsonObject->data->attribution->campaignid
      *
      * @param appGuid
      */
-    private void initAttribution(String appGuid) {
+    private void attribution(String appGuid) {
         try {
             Tracker.configure(new Tracker.Configuration(mContext)
                     .setAppGuid(appGuid)
                     .setAttributionUpdateListener(s -> {
                         LogUtils.log(s);
                         if (TextUtils.isEmpty(s)) {
-                            initLogin();
                         } else {
                             try {
                                 JSONObject jsonObject = new JSONObject(s);
                                 String attribution = jsonObject.optString("attribution");
                                 if (!TextUtils.isEmpty(attribution) && "false".equals(attribution)) {
-                                    //自然量(从googleplay下载)
-                                    initLogin();
+                                    //自然量从googleplay下载)
                                 } else {
                                     //channelCode
                                     String siteId = jsonObject.optString("site_id");
@@ -132,50 +139,42 @@ public class BigFunSDK {
                                             SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                             mSource = source;
                                         }
-                                        initLogin();
                                     } else {
                                         //google或者facebook
                                         String data = jsonObject.optString("data");
                                         if (TextUtils.isEmpty(data)) {
                                             //如果为空则表示不是google或者facebook
-                                            initLogin();
                                         } else {
                                             JSONObject dataJson = new JSONObject(data);
                                             String attribution1 = dataJson.optString("attribution");
                                             if (TextUtils.isEmpty(attribution1)) {
-                                                initLogin();
                                             } else {
                                                 JSONObject attributionJson = new JSONObject(attribution1);
                                                 String networkKey = attributionJson.optString("network_key");
                                                 if (TextUtils.isEmpty(networkKey)) {
-                                                    initLogin();
                                                 } else {
                                                     if ("facebook".equalsIgnoreCase(networkKey)) {
-                                                        String trackerId = attributionJson.optString("tracker_id");
-                                                        if (!TextUtils.isEmpty(trackerId)) {
-                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
-                                                            mChannel = trackerId;
+                                                        String tracker = attributionJson.optString("tracker");
+                                                        if (!TextUtils.isEmpty(tracker)) {
+                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
+                                                            mChannel = tracker;
                                                             String source = attributionJson.optString("campaign_group_id");
                                                             if (!TextUtils.isEmpty(source)) {
                                                                 SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                                                 mSource = source;
                                                             }
                                                         }
-                                                        initLogin();
                                                     } else if ("google".equalsIgnoreCase(networkKey)) {
-                                                        String trackerId = attributionJson.optString("tracker_id");
-                                                        if (!TextUtils.isEmpty(trackerId)) {
-                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, trackerId);
-                                                            mChannel = trackerId;
+                                                        String tracker = attributionJson.optString("tracker");
+                                                        if (!TextUtils.isEmpty(tracker)) {
+                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
+                                                            mChannel = tracker;
                                                             String source = attributionJson.optString("campaignid");
                                                             if (!TextUtils.isEmpty(source)) {
                                                                 SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
                                                                 mSource = source;
                                                             }
                                                         }
-                                                        initLogin();
-                                                    } else {
-                                                        initLogin();
                                                     }
                                                 }
                                             }
@@ -185,7 +184,6 @@ public class BigFunSDK {
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
-                                initLogin();
                             }
                         }
                         mListener.attribution(mChannel, mSource);
@@ -268,15 +266,23 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>();
         map.put("loginType", 1);
         map.put("gameUserId", 0);
-        login(map, new ResponseListener() {
+        login2(map, new Callback<LoginBean>() {
             @Override
-            public void onSuccess() {
-
+            public void onResult(LoginBean result) {
+                if (result != null) {
+                    LoginBean.DataBean data = result.getData();
+                    if (data != null) {
+                        String kochavaAppguid = data.getKochavaAppguid();
+                        if (kochavaAppguid != null && !TextUtils.isEmpty(kochavaAppguid)) {
+                            initAttribution(kochavaAppguid);
+                        }
+                    }
+                }
             }
 
             @Override
             public void onFail(String msg) {
-
+                LogUtils.log(msg);
             }
         });
     }
@@ -467,6 +473,52 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>(params);
         map.put("loginType", 4);
         login(map, listener);
+    }
+
+    public void login2(Map<String, Object> params, Callback<LoginBean> listener) {
+        new Thread(() -> {
+            if (!params.containsKey("loginType") || !params.containsKey("gameUserId") || params.get("gameUserId") == null) {
+                throw new IllegalArgumentException(PAY_TAG + "loginType,gameUserId is required");
+            }
+            Map<String, Object> map = new HashMap<>(params);
+            map.put("deviceType", "Android");
+            map.put("deviceModel", Build.MODEL);
+            map.put("deviceBrand", Build.BRAND);
+            try {
+                map.put("aaid", AdvertisingIdClient.getAdId(mContext));
+            } catch (Exception e) {
+                e.printStackTrace();
+                map.put("aaid", "111111111111111111111111111");
+            }
+            map.put("androidId", Settings.System.getString(mContext.getContentResolver(), Settings.Secure.ANDROID_ID));
+            map.put("ip", IpUtils.getOutNetIP(mContext, 0));
+            map.put("channelCode", mChannel);
+            map.put("verCode", VERSION);
+            map.put("source", mSource);
+            map.put("packageName", mContext.getPackageName());
+            if (!map.containsKey("email")) {
+                map.put("email", "");
+            }
+            if (!map.containsKey("sex")) {
+                map.put("sex", 0);
+            }
+            if (!map.containsKey("age")) {
+                map.put("age", 0);
+            }
+            if (!map.containsKey("nickName")) {
+                map.put("nickName", "unknow");
+            }
+            if (!map.containsKey("headImg")) {
+                map.put("headImg", "unknow");
+            }
+            if (!map.containsKey("mobile")) {
+                map.put("mobile", "0");
+            }
+            if (!map.containsKey("authCode")) {
+                map.put("authCode", "");
+            }
+            HttpUtils.getInstance().initLogin(NetConstant.LOGIN, map, listener);
+        }).start();
     }
 
     /**

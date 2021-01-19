@@ -19,8 +19,7 @@ class App : Application() {
         BigFunSDK.setDebug(true)
         BigFunSDK.getInstance().init(
             applicationContext,
-            "bmartpay_test",
-            "kofreedemo-5jzrjmrf3"
+            "bmartpay_test"
         ) { channelCode, source ->
             Log.d(TAG, "onCreate: $channelCode--$source")
         }
