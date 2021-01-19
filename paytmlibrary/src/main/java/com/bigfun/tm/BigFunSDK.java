@@ -41,7 +41,7 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.4.5";
+    private static final String VERSION = "1.4.6";
 
     private BigFunSDK() {
 
@@ -150,10 +150,10 @@ public class BigFunSDK {
                                             if (TextUtils.isEmpty(attribution1)) {
                                             } else {
                                                 JSONObject attributionJson = new JSONObject(attribution1);
-                                                String networkKey = attributionJson.optString("network_key");
-                                                if (TextUtils.isEmpty(networkKey)) {
+                                                String network = attributionJson.optString("network");
+                                                if (TextUtils.isEmpty(network)) {
                                                 } else {
-                                                    if ("facebook".equalsIgnoreCase(networkKey)) {
+                                                    if ("Facebook".equalsIgnoreCase(network) || "Instagram".equalsIgnoreCase(network)) {
                                                         String tracker = attributionJson.optString("tracker");
                                                         if (!TextUtils.isEmpty(tracker)) {
                                                             SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
@@ -164,7 +164,7 @@ public class BigFunSDK {
                                                                 mSource = source;
                                                             }
                                                         }
-                                                    } else if ("google".equalsIgnoreCase(networkKey)) {
+                                                    } else if ("Google Adwords".equalsIgnoreCase(network)) {
                                                         String tracker = attributionJson.optString("tracker");
                                                         if (!TextUtils.isEmpty(tracker)) {
                                                             SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
