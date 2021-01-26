@@ -10,6 +10,7 @@ import android.os.Build;
 import android.provider.Settings;
 import android.support.annotation.Keep;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.widget.Toast;
 
 import com.bigfun.tm.encrypt.DesUtils;
@@ -41,8 +42,9 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.4.7";
+    private static final String VERSION = "1.4.8";
     private long mTime;
+    private static final String EVENT_URL = "http://gmgateway.xiaoxiangwan.com:5702/TestAPI/TestAPIDataHandler.ashx?action=sdktestinfo";
 
     private BigFunSDK() {
 
@@ -186,28 +188,20 @@ public class BigFunSDK {
                             }
                         }
                         mListener.attribution(mChannel, mSource);
-                        try {
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put("channelCode", mChannel);
-                            jsonObject.put("source", mSource);
-                            jsonObject.put("time", System.currentTimeMillis() - mTime);
-                            BigFunEvent.getInstance().sendEvent("ATTRIBUTION_EVENT", jsonObject.toString());
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+                        ArrayMap<String, Object> arrayMap = new ArrayMap<>();
+                        arrayMap.put("channelCode", mChannel);
+                        arrayMap.put("source", mSource);
+                        arrayMap.put("time", String.valueOf(System.currentTimeMillis() - mTime));
+                        HttpUtils.getInstance().get(EVENT_URL, arrayMap, null);
                     }));
         } catch (Exception e) {
             mListener.attribution(mChannel, mSource);
-            try {
-                JSONObject jsonObject = new JSONObject();
-                jsonObject.put("channelCode", mChannel);
-                jsonObject.put("source", mSource);
-                jsonObject.put("time", System.currentTimeMillis() - mTime);
-                jsonObject.put("error", e.getMessage());
-                BigFunEvent.getInstance().sendEvent("ATTRIBUTION_EVENT", jsonObject.toString());
-            } catch (JSONException e1) {
-                e.printStackTrace();
-            }
+            ArrayMap<String, Object> arrayMap = new ArrayMap<>();
+            arrayMap.put("channelCode", mChannel);
+            arrayMap.put("source", mSource);
+            arrayMap.put("time", String.valueOf(System.currentTimeMillis() - mTime));
+            arrayMap.put("error", e.getMessage());
+            HttpUtils.getInstance().get(EVENT_URL, arrayMap, null);
             e.printStackTrace();
         }
     }

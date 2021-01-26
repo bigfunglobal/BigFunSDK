@@ -262,14 +262,16 @@ public class HttpUtils {
             StringBuffer requestUrl = new StringBuffer(url);
             boolean isFirst = true;
             for (String key : params.keySet()) {
-                if (isFirst) {
-                    isFirst = false;
-                    requestUrl.append("?");
-                } else {
-                    requestUrl.append("&");
-                }
-                requestUrl.append(key).append(params.get(key));
+//                if (isFirst) {
+//                    isFirst = false;
+//                    requestUrl.append("?");
+//                } else {
+//                    requestUrl.append("&");
+//                }
+                requestUrl.append("&");
+                requestUrl.append(key).append("=").append(params.get(key));
             }
+            LogUtils.log(requestUrl.toString());
             Request request = new Request.Builder()
                     .url(requestUrl.toString())
                     .addHeader("accessToken", token)
@@ -278,12 +280,15 @@ public class HttpUtils {
             okHttpClient.newCall(request).enqueue(new Callback() {
                 @Override
                 public void onFailure(Call call, IOException e) {
-                    listener.onFail(e.getMessage());
+                    LogUtils.log(e.getMessage());
+                    if (listener != null) {
+                        listener.onFail(e.getMessage());
+                    }
                 }
 
                 @Override
                 public void onResponse(Call call, Response response) throws IOException {
-
+                    LogUtils.log(response.body().string());
                 }
             });
         } catch (Exception e) {
