@@ -41,7 +41,8 @@ public class BigFunSDK {
      */
     static boolean isDebug = false;
     private static String mSource = "googleplay";
-    private static final String VERSION = "1.4.6";
+    private static final String VERSION = "1.4.7";
+    private long mTime;
 
     private BigFunSDK() {
 
@@ -49,6 +50,7 @@ public class BigFunSDK {
 
     @Keep
     public void init(Context context, String channel, IAttributionListener listener) {
+        mTime = System.currentTimeMillis();
         mContext = context;
         mChannel = channel;
         mListener = listener;
@@ -119,8 +121,7 @@ public class BigFunSDK {
                     .setAppGuid(appGuid)
                     .setAttributionUpdateListener(s -> {
                         LogUtils.log(s);
-                        if (TextUtils.isEmpty(s)) {
-                        } else {
+                        if (!TextUtils.isEmpty(s)) {
                             try {
                                 JSONObject jsonObject = new JSONObject(s);
                                 String attribution = jsonObject.optString("attribution");
@@ -142,17 +143,15 @@ public class BigFunSDK {
                                     } else {
                                         //google或者facebook
                                         String data = jsonObject.optString("data");
-                                        if (TextUtils.isEmpty(data)) {
-                                            //如果为空则表示不是google或者facebook
-                                        } else {
+                                        if (!TextUtils.isEmpty(data)) {
+                                            //如果不为空则表示可能是google或者facebook
                                             JSONObject dataJson = new JSONObject(data);
                                             String attribution1 = dataJson.optString("attribution");
-                                            if (TextUtils.isEmpty(attribution1)) {
-                                            } else {
+                                            if (!TextUtils.isEmpty(attribution1)) {
                                                 JSONObject attributionJson = new JSONObject(attribution1);
                                                 String network = attributionJson.optString("network");
-                                                if (TextUtils.isEmpty(network)) {
-                                                } else {
+                                                if (!TextUtils.isEmpty(network)) {
+                                                    //归因到Facebook
                                                     if ("Facebook".equalsIgnoreCase(network) || "Instagram".equalsIgnoreCase(network)) {
                                                         String tracker = attributionJson.optString("tracker");
                                                         if (!TextUtils.isEmpty(tracker)) {
@@ -164,6 +163,7 @@ public class BigFunSDK {
                                                                 mSource = source;
                                                             }
                                                         }
+                                                        //归因到Google
                                                     } else if ("Google Adwords".equalsIgnoreCase(network)) {
                                                         String tracker = attributionJson.optString("tracker");
                                                         if (!TextUtils.isEmpty(tracker)) {
@@ -180,16 +180,34 @@ public class BigFunSDK {
                                             }
                                         }
                                     }
-
                                 }
                             } catch (JSONException e) {
                                 e.printStackTrace();
                             }
                         }
                         mListener.attribution(mChannel, mSource);
+                        try {
+                            JSONObject jsonObject = new JSONObject();
+                            jsonObject.put("channelCode", mChannel);
+                            jsonObject.put("source", mSource);
+                            jsonObject.put("time", System.currentTimeMillis() - mTime);
+                            BigFunEvent.getInstance().sendEvent("ATTRIBUTION_EVENT", jsonObject.toString());
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }));
         } catch (Exception e) {
             mListener.attribution(mChannel, mSource);
+            try {
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("channelCode", mChannel);
+                jsonObject.put("source", mSource);
+                jsonObject.put("time", System.currentTimeMillis() - mTime);
+                jsonObject.put("error", e.getMessage());
+                BigFunEvent.getInstance().sendEvent("ATTRIBUTION_EVENT", jsonObject.toString());
+            } catch (JSONException e1) {
+                e.printStackTrace();
+            }
             e.printStackTrace();
         }
     }
