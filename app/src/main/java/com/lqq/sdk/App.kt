@@ -18,7 +18,7 @@ class App : Application() {
         super.onCreate()
         BigFunSDK.setDebug(true)
         BigFunSDK.getInstance().init(
-            applicationContext,
+            this,
             "bmartpay_test"
         ) { channelCode, source ->
             Log.d(TAG, "onCreate: $channelCode--$source")
