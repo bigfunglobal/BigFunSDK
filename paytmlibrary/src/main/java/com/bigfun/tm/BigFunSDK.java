@@ -8,20 +8,11 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
-import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.Keep;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.widget.Toast;
-
-import com.adjust.sdk.Adjust;
-import com.adjust.sdk.AdjustAttribution;
-import com.adjust.sdk.AdjustConfig;
-import com.adjust.sdk.AdjustEventSuccess;
-import com.adjust.sdk.LogLevel;
-import com.adjust.sdk.OnAttributionChangedListener;
-import com.adjust.sdk.OnEventTrackingSucceededListener;
 import com.bigfun.tm.encrypt.DesUtils;
 import com.bigfun.tm.login.Callback;
 import com.bigfun.tm.model.LoginBean;
@@ -128,108 +119,90 @@ public class BigFunSDK {
      * @param appGuid
      */
     private void attribution(String appGuid) {
-//        try {
-//            Tracker.configure(new Tracker.Configuration(mContext)
-//                    .setAppGuid(appGuid)
-//                    .setAttributionUpdateListener(s -> {
-//                        LogUtils.log(s);
-//                        if (!TextUtils.isEmpty(s)) {
-//                            try {
-//                                JSONObject jsonObject = new JSONObject(s);
-//                                String attribution = jsonObject.optString("attribution");
-//                                if (!TextUtils.isEmpty(attribution) && "false".equals(attribution)) {
-//                                    //自然量从googleplay下载)
-//                                } else {
-//                                    //channelCode
-//                                    String siteId = jsonObject.optString("site_id");
-//                                    if (!TextUtils.isEmpty(siteId)) {
-//                                        //如果siteId不为空，说明是smartlink
-//                                        SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, siteId);
-//                                        mChannel = siteId;
-//                                        //source
-//                                        String source = jsonObject.optString("creative_id");
-//                                        if (!TextUtils.isEmpty(source)) {
-//                                            SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
-//                                            mSource = source;
-//                                        }
-//                                    } else {
-//                                        //google或者facebook
-//                                        String data = jsonObject.optString("data");
-//                                        if (!TextUtils.isEmpty(data)) {
-//                                            //如果不为空则表示可能是google或者facebook
-//                                            JSONObject dataJson = new JSONObject(data);
-//                                            String attribution1 = dataJson.optString("attribution");
-//                                            if (!TextUtils.isEmpty(attribution1)) {
-//                                                JSONObject attributionJson = new JSONObject(attribution1);
-//                                                String network = attributionJson.optString("network");
-//                                                if (!TextUtils.isEmpty(network)) {
-//                                                    //归因到Facebook
-//                                                    if ("Facebook".equalsIgnoreCase(network) || "Instagram".equalsIgnoreCase(network)) {
-//                                                        String tracker = attributionJson.optString("tracker");
-//                                                        if (!TextUtils.isEmpty(tracker)) {
-//                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
-//                                                            mChannel = tracker;
-//                                                            String source = attributionJson.optString("campaign_group_id");
-//                                                            if (!TextUtils.isEmpty(source)) {
-//                                                                SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
-//                                                                mSource = source;
-//                                                            }
-//                                                        }
-//                                                        //归因到Google
-//                                                    } else if ("Google Adwords".equalsIgnoreCase(network)) {
-//                                                        String tracker = attributionJson.optString("tracker");
-//                                                        if (!TextUtils.isEmpty(tracker)) {
-//                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
-//                                                            mChannel = tracker;
-//                                                            String source = attributionJson.optString("campaignid");
-//                                                            if (!TextUtils.isEmpty(source)) {
-//                                                                SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
-//                                                                mSource = source;
-//                                                            }
-//                                                        }
-//                                                    }
-//                                                }
-//                                            }
-//                                        }
-//                                    }
-//                                }
-//                            } catch (JSONException e) {
-//                                e.printStackTrace();
-//                            }
-//                        }
-//                        mListener.attribution(mChannel, mSource);
-//                        ArrayMap<String, Object> arrayMap = new ArrayMap<>();
-//                        arrayMap.put("channelCode", mChannel);
-//                        arrayMap.put("source", mSource);
-//                        arrayMap.put("time", String.valueOf(System.currentTimeMillis() - mTime));
-//                        HttpUtils.getInstance().get(EVENT_URL, arrayMap, null);
-//                    }));
-//        } catch (Exception e) {
-//            mListener.attribution(mChannel, mSource);
-//            ArrayMap<String, Object> arrayMap = new ArrayMap<>();
-//            arrayMap.put("channelCode", mChannel);
-//            arrayMap.put("source", mSource);
-//            arrayMap.put("time", String.valueOf(System.currentTimeMillis() - mTime));
-//            arrayMap.put("error", e.getMessage());
-//            HttpUtils.getInstance().get(EVENT_URL, arrayMap, null);
-//            e.printStackTrace();
-//        }
         try {
-            SPUtils.getInstance().put(mContext, KEY_IS_INITIALIZED, true);
-            AdjustConfig adjustConfig = new AdjustConfig(mContext, appGuid, AdjustConfig.ENVIRONMENT_SANDBOX);
-            adjustConfig.setLogLevel(LogLevel.VERBOSE);
-            adjustConfig.setOnAttributionChangedListener(attribution -> {
-                if (attribution != null) {
-                    mListener.attribution(attribution.trackerName, attribution.campaign);
-                    SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, attribution.trackerName);
-                    SPUtils.getInstance().put(mContext, KEY_SOURCE, attribution.campaign);
-                }
-            });
-            Adjust.onCreate(adjustConfig);
-            if (mContext instanceof Application) {
-                ((Application) mContext).registerActivityLifecycleCallbacks(new com.bigfun.tm.AdjustLifecycleCallbacks());
-            }
+            Tracker.configure(new Tracker.Configuration(mContext)
+                    .setAppGuid(appGuid)
+                    .setAttributionUpdateListener(s -> {
+                        LogUtils.log(s);
+                        if (!TextUtils.isEmpty(s)) {
+                            try {
+                                JSONObject jsonObject = new JSONObject(s);
+                                String attribution = jsonObject.optString("attribution");
+                                if (!TextUtils.isEmpty(attribution) && "false".equals(attribution)) {
+                                    //自然量从googleplay下载)
+                                } else {
+                                    //channelCode
+                                    String siteId = jsonObject.optString("site_id");
+                                    if (!TextUtils.isEmpty(siteId)) {
+                                        //如果siteId不为空，说明是smartlink
+                                        SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, siteId);
+                                        mChannel = siteId;
+                                        //source
+                                        String source = jsonObject.optString("creative_id");
+                                        if (!TextUtils.isEmpty(source)) {
+                                            SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
+                                            mSource = source;
+                                        }
+                                    } else {
+                                        //google或者facebook
+                                        String data = jsonObject.optString("data");
+                                        if (!TextUtils.isEmpty(data)) {
+                                            //如果不为空则表示可能是google或者facebook
+                                            JSONObject dataJson = new JSONObject(data);
+                                            String attribution1 = dataJson.optString("attribution");
+                                            if (!TextUtils.isEmpty(attribution1)) {
+                                                JSONObject attributionJson = new JSONObject(attribution1);
+                                                String network = attributionJson.optString("network");
+                                                if (!TextUtils.isEmpty(network)) {
+                                                    //归因到Facebook
+                                                    if ("Facebook".equalsIgnoreCase(network) || "Instagram".equalsIgnoreCase(network)) {
+                                                        String tracker = attributionJson.optString("tracker");
+                                                        if (!TextUtils.isEmpty(tracker)) {
+                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
+                                                            mChannel = tracker;
+                                                            String source = attributionJson.optString("campaign_group_id");
+                                                            if (!TextUtils.isEmpty(source)) {
+                                                                SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
+                                                                mSource = source;
+                                                            }
+                                                        }
+                                                        //归因到Google
+                                                    } else if ("Google Adwords".equalsIgnoreCase(network)) {
+                                                        String tracker = attributionJson.optString("tracker");
+                                                        if (!TextUtils.isEmpty(tracker)) {
+                                                            SPUtils.getInstance().put(mContext, KEY_CHANNEL_CODE, tracker);
+                                                            mChannel = tracker;
+                                                            String source = attributionJson.optString("campaignid");
+                                                            if (!TextUtils.isEmpty(source)) {
+                                                                SPUtils.getInstance().put(mContext, KEY_SOURCE, source);
+                                                                mSource = source;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            } catch (JSONException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                        mListener.attribution(mChannel, mSource);
+                        ArrayMap<String, Object> arrayMap = new ArrayMap<>();
+                        arrayMap.put("channelCode", mChannel);
+                        arrayMap.put("source", mSource);
+                        arrayMap.put("time", String.valueOf(System.currentTimeMillis() - mTime));
+                        HttpUtils.getInstance().get(EVENT_URL, arrayMap, null);
+                    }));
         } catch (Exception e) {
+            mListener.attribution(mChannel, mSource);
+            ArrayMap<String, Object> arrayMap = new ArrayMap<>();
+            arrayMap.put("channelCode", mChannel);
+            arrayMap.put("source", mSource);
+            arrayMap.put("time", String.valueOf(System.currentTimeMillis() - mTime));
+            arrayMap.put("error", e.getMessage());
+            HttpUtils.getInstance().get(EVENT_URL, arrayMap, null);
             e.printStackTrace();
         }
     }
@@ -750,43 +723,5 @@ public class BigFunSDK {
         Map<String, Object> map = new HashMap<>(params);
         map.put("source", mSource);
         HttpUtils.getInstance().payOrder(NetConstant.PAY_URL, map, activity, 100, listener);
-    }
-
-    private static final class AdjustLifecycleCallbacks implements Application.ActivityLifecycleCallbacks {
-
-        @Override
-        public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
-
-        }
-
-        @Override
-        public void onActivityStarted(Activity activity) {
-
-        }
-
-        @Override
-        public void onActivityResumed(Activity activity) {
-            Adjust.onResume();
-        }
-
-        @Override
-        public void onActivityPaused(Activity activity) {
-            Adjust.onPause();
-        }
-
-        @Override
-        public void onActivityStopped(Activity activity) {
-
-        }
-
-        @Override
-        public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
-
-        }
-
-        @Override
-        public void onActivityDestroyed(Activity activity) {
-
-        }
     }
 }
