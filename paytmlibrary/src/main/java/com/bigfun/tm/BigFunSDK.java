@@ -58,7 +58,6 @@ public class BigFunSDK {
         mListener = listener;
         checkSdkNotInit();
         initLogin();
-        attribution("");
         //是否已经归因
         LogUtils.log("sdk init success");
     }
